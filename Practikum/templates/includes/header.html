@@ -1,11 +1,18 @@
 {% load static %}
-<header>
-  <nav class="navbar navbar-light" style="background-color: lightskyblue">
-    <div class="container">
-      <a class="navbar-brand {% if request.path == '/' %}active{% endif %}" href="{% url 'blog:index' %}">
-        <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="Лого">
-        Practikum
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
+<header class="site-header">
+  <div class="header-container">
+      <a href="/" class="header-brand">
+          <span class="brand-icon">PR</span>
+          <span class="brand-text">Practikum</span>
       </a>
-    </div>
-  </nav> 
+      
+      <nav class="header-nav">
+          <a href="#" class="nav-link">Мои курсы</a>
+          <a href="#" class="nav-link">Все курсы</a>
+          <div class="user-avatar">
+              <span>👤</span>
+          </div>
+      </nav>
+  </div>
 </header>
