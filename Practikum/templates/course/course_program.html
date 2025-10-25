@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Программа курса - Практикум
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/course_program.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="course-container">
+    <div class="course-header">
+        <div class="course-title-wrapper">
+            <h1 class="course-title">Курс</h1>
+            <div class="course-progress">
+                <span class="progress-circle"></span>
+                <span class="progress-text">100%</span>
+            </div>
+        </div>
+        <h2 class="section-title">Программа курса</h2>
+    </div>
+
+    <div class="topics-grid">
+        {% for topic in topics %}
+        <div class="topic-card">
+            <div class="topic-image">
+                <!-- Placeholder для изображения -->
+            </div>
+            <div class="topic-footer">
+                <span class="topic-label">Тема</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
