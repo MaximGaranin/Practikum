@@ -1,16 +1,12 @@
 /* === Header === */
-:root {
-    --navbar-height: 56px;
-}
-
 .site-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: var(--navbar-height);
-    background-color: var(--color-charcoal-800);
-    border-bottom: 1px solid rgba(119, 124, 124, 0.2);
+    background-color: var(--color-charcoal-700);
+    border-bottom: none;
     z-index: 1000;
 }
 
@@ -24,6 +20,13 @@
     justify-content: space-between;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* === Brand (Logo) === */
 .header-brand {
     display: flex;
     align-items: center;
@@ -50,6 +53,7 @@
     font-weight: 600;
 }
 
+/* === Navigation === */
 .header-nav {
     display: flex;
     align-items: center;
@@ -100,7 +104,7 @@
     transform: scale(1.05);
 }
 
-/* === Responsive Header === */
+/* === Responsive === */
 @media (max-width: 768px) {
     .header-container {
         padding: 0 16px;

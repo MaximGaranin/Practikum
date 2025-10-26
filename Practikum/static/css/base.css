@@ -9,7 +9,7 @@
     --navbar-height: 56px;
 }
 
-/* === Reset & Layout === */
+/* === Reset === */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -27,14 +27,28 @@ body {
     color: var(--color-gray-200);
     background-color: var(--color-charcoal-700);
     -webkit-font-smoothing: antialiased;
-    padding-top: var(--navbar-height);
     
-    /* Flexbox для прижатия footer к низу */
+    /* КРИТИЧНО для прижатия footer */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-main {
+/* === Layout === */
+.layout-container {
+    display: flex;
     flex: 1 0 auto;
+    padding-top: var(--navbar-height);
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 20px;
 }
