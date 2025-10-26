@@ -1,8 +1,10 @@
 from django.shortcuts import render
 
+
 def course(request):
     """Главная страница выбора курсов."""
     return render(request, 'course/course.html')
+
 
 def course_program(request, course_id=None):
     """Страница программы курса."""
