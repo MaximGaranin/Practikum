@@ -13,8 +13,8 @@
 
         <div class="sidebar-section">
             <ul class="sidebar-menu">
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                <li class="sidebar-item {% if request.path == '/profile/' %}active{% endif %}">
+                    <a class="sidebar-link" href="{% url 'prac:profile' %}">
                         <span>👤</span>
                         <span class="sidebar-text">Личный кабинет</span>
                     </a>
@@ -24,8 +24,8 @@
 
         <div class="sidebar-section">
             <ul class="sidebar-menu">
-                <li class="sidebar-item active">
-                    <a href="#" class="sidebar-link">
+                <li class="sidebar-item {% if request.path == '/' %}active{% endif %}">
+                    <a href="{% url 'prac:course' %}" class="sidebar-link">
                         <span class="sidebar-icon">📚</span>
                         <span class="sidebar-text">Курсы</span>
                     </a>
@@ -35,8 +35,8 @@
 
         <div class="sidebar-section">
             <ul class="sidebar-menu">
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                <li class="sidebar-item {% if request.path == '/task/' %}active{% endif %}">
+                    <a href="{% url 'prac:task' %}" class="sidebar-link">
                         <span class="sidebar-icon">✓</span>
                         <span class="sidebar-text">Задачи</span>
                     </a>
@@ -46,8 +46,8 @@
 
         <div class="sidebar-section">
             <ul class="sidebar-menu">
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                <li class="sidebar-item {% if request.path == '/settings/' %}active{% endif %}">
+                    <a href="{% url 'prac:settings' %}" class="sidebar-link">
                         <span class="sidebar-icon">⚙️</span>
                         <span class="sidebar-text">Настройки</span>
                     </a>

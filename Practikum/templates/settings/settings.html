@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <div class="page-header">
+        <h1>Настройки</h1>
+    </div>
+    
+    <div class="settings-container">
+        <!-- Настройки профиля -->
+        <div class="settings-section">
+            <h2>Профиль</h2>
+            
+            <div class="setting-item">
+                <label for="fullname">ФИО</label>
+                <input type="text" id="fullname" value="Гаранин Максим Алексеевич">
+            </div>
+            
+            <div class="setting-item">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="lmibuh3@yandex.ru">
+            </div>
+            
+            <div class="setting-item">
+                <label for="phone">Телефон</label>
+                <input type="tel" id="phone" value="+7 (909) 337-94-40">
+            </div>
+            
+            <div class="setting-item">
+                <label for="group">Группа</label>
+                <input type="text" id="group" value="1511" disabled>
+            </div>
+            
+            <div class="setting-item">
+                <label for="avatar">Аватар</label>
+                <div class="avatar-upload">
+                    <div class="avatar-preview"></div>
+                    <button class="btn btn-secondary">Загрузить фото</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Смена пароля -->
+        <div class="settings-section">
+            <h2>Безопасность</h2>
+            
+            <div class="setting-item">
+                <label for="current-password">Текущий пароль</label>
+                <input type="password" id="current-password">
+            </div>
+            
+            <div class="setting-item">
+                <label for="new-password">Новый пароль</label>
+                <input type="password" id="new-password">
+            </div>
+            
+            <div class="setting-item">
+                <label for="confirm-password">Подтвердите пароль</label>
+                <input type="password" id="confirm-password">
+            </div>
+            
+            <button class="btn btn-primary">Изменить пароль</button>
+        </div>
+        
+        <!-- Уведомления -->
+        <div class="settings-section">
+            <h2>Уведомления</h2>
+            
+            <div class="setting-toggle">
+                <div class="toggle-info">
+                    <span class="toggle-label">Email уведомления</span>
+                    <span class="toggle-desc">Получать уведомления на почту</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-toggle">
+                <div class="toggle-info">
+                    <span class="toggle-label">Новые домашние задания</span>
+                    <span class="toggle-desc">Уведомления о новых заданиях</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-toggle">
+                <div class="toggle-info">
+                    <span class="toggle-label">Оценки</span>
+                    <span class="toggle-desc">Уведомления о проверке работ</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-toggle">
+                <div class="toggle-info">
+                    <span class="toggle-label">Комментарии</span>
+                    <span class="toggle-desc">Уведомления о комментариях</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Интерфейс -->
+        <div class="settings-section">
+            <h2>Интерфейс</h2>
+            
+            <div class="setting-item">
+                <label for="theme">Тема</label>
+                <select id="theme">
+                    <option value="light">Светлая</option>
+                    <option value="dark">Тёмная</option>
+                    <option value="auto">Системная</option>
+                </select>
+            </div>
+            
+            <div class="setting-item">
+                <label for="language">Язык</label>
+                <select id="language">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Кнопки действий -->
+        <div class="settings-actions">
+            <button class="btn btn-primary">Сохранить изменения</button>
+            <button class="btn btn-secondary">Отменить</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

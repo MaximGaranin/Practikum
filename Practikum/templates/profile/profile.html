@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Профиль
+{% endblock %}
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar"></div>
+            <div class="profile-info">
+                <h1>Гаранин Максим Алексеевич</h1>
+                <p>Группа: 1511</p>
+                <p>Телефон: 89093379440</p>
+                <p>Почта: lmibuh3@yandex.ru</p>
+            </div>
+            <div class="profile-icon">🎓</div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+            <div class="stat-card">Статистика</div>
+        </div>
+    </div>
+{% endblock %}

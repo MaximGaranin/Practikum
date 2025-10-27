@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Домашние задания{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/task.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="homework-page">
+    <div class="page-header">
+        <h1>Задачи</h1>
+        <div class="filters">
+            <button class="filter-btn active">Все</button>
+            <button class="filter-btn">Активные</button>
+            <button class="filter-btn">Завершенные</button>
+        </div>
+    </div>
+    
+    <div class="homework-list">
+        <!-- Домашнее задание 1 -->
+        <div class="homework-card">
+            <div class="card-header">
+                <div class="course-info">
+                    <h3>Python-разработчик</h3>
+                    <span class="lesson">Урок 5: Списки и циклы</span>
+                </div>
+                <span class="status status-active">Активно</span>
+            </div>
+            <div class="card-body">
+                <p class="description">Создайте программу для работы со списками. Реализуйте функции добавления, удаления и поиска элементов.</p>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <span class="icon">📅</span>
+                        <span>Выдано: 20.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">⏰</span>
+                        <span>Дедлайн: 27.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">📊</span>
+                        <span>Баллы: 10</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary">Открыть задание</button>
+                <button class="btn btn-secondary">Сдать работу</button>
+            </div>
+        </div>
+        
+        <!-- Домашнее задание 2 -->
+        <div class="homework-card">
+            <div class="card-header">
+                <div class="course-info">
+                    <h3>Web-разработка</h3>
+                    <span class="lesson">Урок 3: HTML формы</span>
+                </div>
+                <span class="status status-pending">На проверке</span>
+            </div>
+            <div class="card-body">
+                <p class="description">Создайте HTML форму регистрации с валидацией полей. Используйте различные типы input.</p>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <span class="icon">📅</span>
+                        <span>Выдано: 18.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">⏰</span>
+                        <span>Дедлайн: 25.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">📊</span>
+                        <span>Баллы: 8</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary">Открыть задание</button>
+                <button class="btn btn-secondary" disabled>Уже сдано</button>
+            </div>
+        </div>
+        
+        <!-- Домашнее задание 3 -->
+        <div class="homework-card">
+            <div class="card-header">
+                <div class="course-info">
+                    <h3>Python-разработчик</h3>
+                    <span class="lesson">Урок 4: Функции</span>
+                </div>
+                <span class="status status-completed">Выполнено</span>
+            </div>
+            <div class="card-body">
+                <p class="description">Напишите функции для работы с текстом: подсчет слов, замена символов, разворот строки.</p>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <span class="icon">📅</span>
+                        <span>Выдано: 15.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">⏰</span>
+                        <span>Дедлайн: 22.10.2025</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="icon">✅</span>
+                        <span>Оценка: 9/10</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary">Посмотреть результат</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
