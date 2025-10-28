@@ -5,5 +5,6 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('practikum.urls')),
-    path('auth/', include('registration.urls')),  # Встроенная аутентификация Django
+    path('auth/', include('django.contrib.auth.urls')),
+    path('auth/', include('registration.urls')),
 ]

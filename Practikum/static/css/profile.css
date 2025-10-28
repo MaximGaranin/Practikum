@@ -1,88 +1,272 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: rgba(31, 33, 33, 1);
-    padding: 20px;
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #232323;
+  color: #f8f9fa;
 }
 
-.profile-card {
-    max-width: 1200px;
-    margin: 0 auto;
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+}
+
+.profile-box {
+  background: #252525;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid #393939;
+  padding: 2.5rem 2rem;
+  max-width: 700px;
+  width: 100%;
 }
 
 .profile-header {
-    display: grid;
-    grid-template-columns: 200px 1fr auto;
-    gap: 40px;
-    padding: 40px;
-    border-bottom: 1px solid #ddd;
-    align-items: center;
+  text-align: center;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #393939;
+  margin-bottom: 2rem;
 }
 
 .avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 2px solid #ddd;
-    background: #f5f5f5;
+  margin: 0 auto 1.5rem;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.profile-info h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: rgba(245, 245, 245, 1);
-    margin-bottom: 12px;
+.username {
+  color: #f8f9fa;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
-.profile-info p {
-    font-size: 16px;
-    color: rgba(245, 245, 245, 1);
-    margin: 6px 0;
+.edit-btn {
+  display: inline-block;
+  background-color: #409eff;
+  border: 1px solid #3498db;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.profile-icon {
-    font-size: 40px;
+.edit-btn:hover {
+  background-color: #2178c7;
+  border-color: #176092;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
+/* Секции */
+.stats-section,
+.info-section,
+.edit-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  color: #f8f9fa;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #393939;
+}
+
+/* Форма редактирования */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #bbbbbb;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  width: 100%;
+  background-color: #2c2c2c;
+  color: #f8f9fa;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.form-group input:focus {
+  background-color: #262626;
+  border-color: #68ccff;
+  box-shadow: 0 0 0 3px rgba(104, 204, 255, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.save-btn {
+  flex: 1;
+  background-color: #409eff;
+  border: 1px solid #3498db;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+  background-color: #2178c7;
+  border-color: #176092;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.cancel-btn {
+  flex: 1;
+  background-color: #555;
+  border: 1px solid #666;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #666;
+  border-color: #777;
+}
+
+/* Статистика */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    padding: 40px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .stat-card {
-    background: #e0e0e0;
-    padding: 60px 20px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-    border-radius: 8px;
+  background: #2c2c2c;
+  border: 1px solid #393939;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-@media (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2);
 }
 
-@media (max-width: 768px) {
-    .profile-header {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    
-    .avatar {
-        margin: 0 auto;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.stat-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  color: #409eff;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.stat-label {
+  color: #bbbbbb;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Информация */
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #2c2c2c;
+  border-radius: 8px;
+  border: 1px solid #393939;
+}
+
+.info-group label {
+  color: #bbbbbb;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.info-group span {
+  color: #f8f9fa;
+  font-size: 1rem;
+}
+
+.error-messages {
+  background: #ff4444;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+  .profile-box {
+    padding: 2rem 1.5rem;
+  }
+  
+  .username {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
 }
