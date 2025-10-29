@@ -20,7 +20,13 @@
       <h2 class="username">{{ profile.username }}</h2>
       
       {% if user.is_authenticated and user == profile %}
-        <button id="editToggleBtn" class="edit-btn">Редактировать профиль</button>
+        <div class="header-buttons">
+          <button id="editToggleBtn" class="edit-btn">Редактировать профиль</button>
+          <form method="post" action="{% url 'logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Выйти</button>
+          </form>
+        </div>
       {% endif %}
     </div>
 
@@ -103,27 +109,5 @@
   </div>
 </div>
 
-<script>
-  // JavaScript для переключения режимов
-  const editBtn = document.getElementById('editToggleBtn');
-  const cancelBtn = document.getElementById('cancelBtn');
-  const viewMode = document.getElementById('viewMode');
-  const editMode = document.getElementById('editMode');
-
-  if (editBtn) {
-    editBtn.addEventListener('click', function() {
-      viewMode.style.display = 'none';
-      editMode.style.display = 'block';
-      editBtn.style.display = 'none';
-    });
-  }
-
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', function() {
-      viewMode.style.display = 'block';
-      editMode.style.display = 'none';
-      editBtn.style.display = 'inline-block';
-    });
-  }
-</script>
+<script src='{% static "js/profile.js" %}'></script>
 {% endblock %}

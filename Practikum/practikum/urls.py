@@ -10,4 +10,5 @@ urlpatterns = [
     path('profile/<str:username>/edit/', views.edit_profile, name='edit_profile'),
     path('task/', views.task, name='task'),
     path('settings/', views.settings, name='settings'),
+    path('auth/registration/', views.RegisterView.as_view(), name='registration'),
 ]
