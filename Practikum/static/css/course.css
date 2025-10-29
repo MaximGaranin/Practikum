@@ -1,249 +1,305 @@
 :root {
-            --color-white: rgba(255, 255, 255, 1);
-            --color-black: rgba(0, 0, 0, 1);
-            --color-cream-50: rgba(252, 252, 249, 1);
-            --color-cream-100: rgba(255, 255, 253, 1);
-            --color-gray-200: rgba(245, 245, 245, 1);
-            --color-gray-300: rgba(167, 169, 169, 1);
-            --color-gray-400: rgba(119, 124, 124, 1);
-            --color-slate-500: rgba(98, 108, 113, 1);
-            --color-brown-600: rgba(94, 82, 64, 1);
-            --color-charcoal-700: rgba(31, 33, 33, 1);
-            --color-charcoal-800: rgba(38, 40, 40, 1);
-            --color-slate-900: rgba(19, 52, 59, 1);
-            --color-teal-300: rgba(50, 184, 198, 1);
-            --color-teal-500: rgba(33, 128, 141, 1);
-            --color-teal-600: rgba(29, 116, 128, 1);
-            --color-brown-600-rgb: 94, 82, 64;
-            --color-teal-500-rgb: 33, 128, 141;
-            --color-background: var(--color-cream-50);
-            --color-surface: var(--color-cream-100);
-            --color-text: var(--color-slate-900);
-            --color-text-secondary: var(--color-slate-500);
-            --color-primary: var(--color-teal-500);
-            --color-primary-hover: var(--color-teal-600);
-            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
-            --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --font-size-base: 14px;
-            --font-size-lg: 16px;
-            --font-size-xl: 18px;
-            --font-size-2xl: 20px;
-            --font-weight-medium: 500;
-            --font-weight-semibold: 550;
-            --space-8: 8px;
-            --space-12: 12px;
-            --space-16: 16px;
-            --space-20: 20px;
-            --space-24: 24px;
-            --space-32: 32px;
-            --radius-base: 8px;
-            --radius-lg: 12px;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-            --duration-fast: 150ms;
-            --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
-        }
+    --color-white: rgba(255, 255, 255, 1);
+    --color-black: rgba(0, 0, 0, 1);
+    --color-gray-200: rgba(245, 245, 245, 1);
+    --color-gray-300: rgba(167, 169, 169, 1);
+    --color-gray-400: rgba(119, 124, 124, 1);
+    --color-slate-500: rgba(98, 108, 113, 1);
+    --color-charcoal-700: rgba(31, 33, 33, 1);
+    --color-charcoal-800: rgba(38, 40, 40, 1);
+    --color-slate-900: rgba(19, 52, 59, 1);
+    --color-teal-300: rgba(50, 184, 198, 1);
+    --color-teal-500: rgba(33, 128, 141, 1);
+    --color-teal-600: rgba(29, 116, 128, 1);
+    --color-blue-400: rgba(64, 158, 255, 1);
+    --color-blue-500: rgba(33, 120, 199, 1);
+    --color-background: #232323;
+    --color-surface: #252525;
+    --color-surface-elevated: #2c2c2c;
+    --color-text: var(--color-gray-200);
+    --color-text-secondary: rgba(187, 187, 187, 0.9);
+    --color-primary: var(--color-blue-400);
+    --color-primary-hover: var(--color-blue-500);
+    --color-border: rgba(57, 57, 57, 1);
+    --color-card-border: rgba(57, 57, 57, 0.6);
+    --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-size-base: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-48: 48px;
+    --radius-base: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 18px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(64, 158, 255, 0.2);
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-gray-400-rgb: 119, 124, 124;
-                --color-teal-300-rgb: 50, 184, 198;
-                --color-gray-300-rgb: 167, 169, 169;
-                --color-gray-200-rgb: 245, 245, 245;
-                --color-background: var(--color-charcoal-700);
-                --color-surface: var(--color-charcoal-800);
-                --color-text: var(--color-gray-200);
-                --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
-                --color-primary: var(--color-teal-300);
-                --color-border: rgba(var(--color-gray-400-rgb), 0.3);
-                --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
-            }
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: var(--color-charcoal-700);
+    -webkit-font-smoothing: antialiased;
+}
 
-        body {
-            font-family: var(--font-family-base);
-            font-size: var(--font-size-base);
-            line-height: 1.5;
-            color: var(--color-text);
-            background-color: var(--color-background);
-            -webkit-font-smoothing: antialiased;
-        }
+.course-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-32) var(--space-20);
+}
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: var(--space-32) var(--space-20);
-        }
+/* Баннер авторизации */
+.auth-banner {
+    background: linear-gradient(135deg, #409eff 0%, #2178c7 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--space-48) var(--space-32);
+    margin-bottom: var(--space-48);
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(64, 158, 255, 0.3);
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-32);
-        }
+.auth-banner-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
 
-        h1 {
-            font-size: var(--font-size-2xl);
-            font-weight: var(--font-weight-semibold);
-            color: var(--color-text);
-        }
+.auth-banner-title {
+    color: var(--color-white);
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 1rem;
+}
 
-        .recent-link {
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            font-size: var(--font-size-base);
-            transition: color var(--duration-fast) var(--ease-standard);
-        }
+.auth-banner-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
 
-        .recent-link:hover {
-            color: var(--color-primary);
-        }
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .filters {
-            display: flex;
-            gap: var(--space-12);
-            margin-bottom: var(--space-24);
-        }
+.auth-btn {
+    display: inline-block;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all var(--duration-normal) var(--ease-standard);
+    cursor: pointer;
+    border: 2px solid transparent;
+}
 
-        .filter-select {
-            padding: var(--space-8) var(--space-32) var(--space-8) var(--space-12);
-            font-size: var(--font-size-base);
-            color: var(--color-text);
-            background-color: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-base);
-            cursor: pointer;
-            transition: border-color var(--duration-fast) var(--ease-standard);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right var(--space-12) center;
-            background-size: 16px;
-        }
+.auth-btn-login {
+    background-color: var(--color-white);
+    color: #409eff;
+    border-color: var(--color-white);
+}
 
-        .filter-select:focus {
-            outline: 2px solid var(--color-primary);
-            outline-offset: 2px;
-            border-color: var(--color-primary);
-        }
+.auth-btn-login:hover {
+    background-color: transparent;
+    color: var(--color-white);
+    border-color: var(--color-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
 
-        @media (prefers-color-scheme: dark) {
-            .filter-select {
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            }
-        }
+.auth-btn-register {
+    background-color: transparent;
+    color: var(--color-white);
+    border-color: var(--color-white);
+}
 
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: var(--space-16);
-        }
+.auth-btn-register:hover {
+    background-color: var(--color-white);
+    color: #409eff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
 
-        .course-card {
-            background-color: var(--color-surface);
-            border: 1px solid var(--color-card-border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-20);
-            cursor: pointer;
-            transition: all var(--duration-fast) var(--ease-standard);
-            position: relative;
-        }
+/* Заголовок курсов */
+.courses-header {
+    margin-bottom: var(--space-32);
+    text-align: center;
+}
 
-        .course-card:hover {
-            box-shadow: var(--shadow-sm);
-            border-color: var(--color-border);
-        }
+.courses-title {
+    color: var(--color-text);
+    font-size: 2.5rem;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 0.5rem;
+}
 
-        .course-card input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+.courses-subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
 
-        .course-card input[type="radio"]:checked + .course-content {
-            border-color: var(--color-primary);
-        }
+/* Сетка курсов */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-24);
+    margin-top: var(--space-32);
+}
 
-        .course-card input[type="radio"]:checked + .course-content .radio-custom {
-            border-color: var(--color-primary);
-            background-color: var(--color-primary);
-        }
+/* Карточка курса */
+.course-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-32);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+    position: relative;
+}
 
-        .course-card input[type="radio"]:checked + .course-content .radio-custom::after {
-            display: block;
-        }
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+}
 
-        .course-card input[type="radio"]:focus + .course-content {
-            outline: 2px solid var(--color-primary);
-            outline-offset: 2px;
-        }
+.course-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-20);
+    display: block;
+}
 
-        .course-content {
-            display: flex;
-            align-items: center;
-            gap: var(--space-12);
-            transition: border-color var(--duration-fast) var(--ease-standard);
-        }
+.course-name {
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-12);
+}
 
-        .radio-custom {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--color-border);
-            border-radius: 50%;
-            flex-shrink: 0;
-            transition: all var(--duration-fast) var(--ease-standard);
-            position: relative;
-            background-color: transparent;
-        }
+.course-description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-24);
+    line-height: 1.6;
+}
 
-        .radio-custom::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background-color: var(--color-surface);
-            border-radius: 50%;
-            display: none;
-        }
+/* Кнопки курсов */
+.course-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-standard);
+}
 
-        .course-name {
-            font-size: var(--font-size-base);
-            font-weight: var(--font-weight-medium);
-            color: var(--color-text);
-        }
+.course-btn:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
 
-        @media (max-width: 1200px) {
-            .courses-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
+.course-btn-disabled {
+    background-color: #555;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
-        @media (max-width: 960px) {
-            .courses-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
+.course-btn-disabled:hover {
+    background-color: #555;
+    transform: none;
+    box-shadow: none;
+}
 
-        @media (max-width: 720px) {
-            .courses-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .courses-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
 
-        @media (max-width: 480px) {
-            .courses-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+@media (max-width: 768px) {
+    .course-container {
+        padding: var(--space-24) var(--space-16);
+    }
+
+    .auth-banner {
+        padding: var(--space-32) var(--space-24);
+        margin-bottom: var(--space-32);
+    }
+
+    .auth-banner-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-banner-text {
+        font-size: 1rem;
+    }
+
+    .auth-buttons {
+        flex-direction: column;
+    }
+
+    .auth-btn {
+        width: 100%;
+    }
+
+    .courses-title {
+        font-size: 2rem;
+    }
+
+    .courses-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-16);
+    }
+
+    .course-card {
+        padding: var(--space-24);
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-banner-title {
+        font-size: 1.3rem;
+    }
+
+    .courses-title {
+        font-size: 1.5rem;
+    }
+
+    .course-icon {
+        font-size: 3rem;
+    }
+}

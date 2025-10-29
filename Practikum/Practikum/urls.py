@@ -6,4 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('practikum.urls')),
     path('auth/', include('django.contrib.auth.urls')),
+    path('auth/', include('practikum.urls')),
 ]

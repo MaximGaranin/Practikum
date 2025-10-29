@@ -143,16 +143,60 @@ html, body {
   border-color: #777;
 }
 
+/* Сообщения об ошибках */
 .error-messages {
   background: #ff4444;
   color: white;
   padding: 1rem;
   border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #cc0000;
+}
+
+.error-text {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+/* Блок переключения между входом и регистрацией */
+.auth-switch {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #393939;
+  text-align: center;
+}
+
+.auth-text {
+  color: #bbbbbb;
+  font-size: 0.95rem;
   margin-bottom: 1rem;
 }
 
-.error {
-  margin: 0.5rem 0;
+.login-link-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background-color: transparent;
+  border: 2px solid #409eff;
+  color: #409eff;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.login-link-btn:hover {
+  background-color: #409eff;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+
+.login-link-btn:active {
+  transform: translateY(0);
 }
 
 /* Адаптив для мобильных */
