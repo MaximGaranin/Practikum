@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_bootstrap5',
     'practikum.apps.PractikumConfig',
-    'registration.apps.RegistrationConfig'
 ]
 
 MIDDLEWARE = [

@@ -19,23 +19,10 @@
       </div>
       <h2 class="username">{{ profile.username }}</h2>
       
-      <button id="editToggleBtn" class="edit-btn">Редактировать профиль</button>
-    </div>
-
-    <!-- Форма редактирования -->
-    <form method="post" id="profileForm" class="profile-form" style="display: none;">
-      {% csrf_token %}
-      
-      {% if form.errors %}
-        <div class="error-messages">
-          {% for field, errors in form.errors.items %}
-            {% for error in errors %}
-              <p class="error">{{ error }}</p>
-            {% endfor %}
-          {% endfor %}
-        </div>
+      {% if user.is_authenticated and user == profile %}
+        <button id="editToggleBtn" class="edit-btn">Редактировать профиль</button>
       {% endif %}
-    </form>
+    </div>
 
     <!-- Информация о пользователе (режим просмотра) -->
     <div class="info-section" id="viewMode">
@@ -43,17 +30,17 @@
       <div class="profile-info">
         <div class="info-group">
           <label>Имя:</label>
-          <span id="view-first-name">{{ profile.first_name|default:"Не указано" }}</span>
+          <span>{{ profile.first_name|default:"Не указано" }}</span>
         </div>
 
         <div class="info-group">
           <label>Фамилия:</label>
-          <span id="view-last-name">{{ profile.last_name|default:"Не указано" }}</span>
+          <span>{{ profile.last_name|default:"Не указано" }}</span>
         </div>
 
         <div class="info-group">
           <label>Email:</label>
-          <span id="view-email">{{ profile.email|default:"Не указан" }}</span>
+          <span>{{ profile.email|default:"Не указан" }}</span>
         </div>
 
         <div class="info-group">
@@ -69,10 +56,21 @@
     </div>
 
     <!-- Режим редактирования -->
+    {% if user.is_authenticated and user == profile %}
     <div class="edit-section" id="editMode" style="display: none;">
       <h3 class="section-title">Редактирование данных</h3>
       <form method="post" class="edit-form">
         {% csrf_token %}
+        
+        {% if form.errors %}
+          <div class="error-messages">
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <p class="error-text">{{ error }}</p>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        {% endif %}
         
         <div class="form-group">
           <label for="id_first_name">Имя:</label>
@@ -101,7 +99,9 @@
         </div>
       </form>
     </div>
-
+    {% endif %}
+  </div>
+</div>
 
 <script>
   // JavaScript для переключения режимов

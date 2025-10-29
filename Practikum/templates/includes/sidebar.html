@@ -14,7 +14,7 @@
         <div class="sidebar-section">
             <ul class="sidebar-menu">
                 <li class="sidebar-item {% if request.path == '/profile/' %}active{% endif %}">
-                    <a class="sidebar-link" href="{% url 'prac:profile' %}">
+                    <a class="sidebar-link" href="{% url 'prac:profile' user.username %}">
                         <span>👤</span>
                         <span class="sidebar-text">Личный кабинет</span>
                     </a>
