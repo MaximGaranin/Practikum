@@ -37,19 +37,18 @@ def course_program(request, course_id=None):
 def profile(request, username):
     """Страница профиля пользователя."""
     profile_user = get_object_or_404(User, username=username)
-    
-    # Обработка POST-запроса для сохранения данных профиля
+
     if request.method == 'POST' and request.user.is_authenticated and request.user == profile_user:
         profile_user.first_name = request.POST.get('first_name', '').strip()
         profile_user.last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
-        
+
         if email:
             profile_user.email = email
-        
+
         profile_user.save()
         return redirect('prac:profile', username=username)
-    
+
     return render(
         request,
         'profile/profile.html',
