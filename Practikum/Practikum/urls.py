@@ -7,4 +7,5 @@ urlpatterns = [
     path('', include('practikum.urls')),
     path('auth/', include('django.contrib.auth.urls')),
     path('auth/', include('practikum.urls')),
+    path('', include('Logistic_Task.urls')),
 ]

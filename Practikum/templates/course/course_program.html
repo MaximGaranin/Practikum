@@ -29,9 +29,11 @@
                 <!-- Placeholder для изображения -->
             </div>
             <div class="topic-footer">
-                <span class="topic-label">Тема</span>
+                <span class="topic-label">{{ topic.name }}</span>
             </div>
         </div>
+        {% empty %}
+        <p> )))))))))))))))) </p>
         {% endfor %}
     </div>
 </div>
