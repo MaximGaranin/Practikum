@@ -38,7 +38,7 @@
       <h3 class="course-name">Python для начинающих</h3>
       <p class="course-description">Основы программирования на Python</p>
       {% if user.is_authenticated %}
-        <a href="{% url 'prac:course_program' course_id=1 %}" class="course-btn">Начать обучение</a>
+        <a href="{% url 'task_mananger:course_program' course_id=1 %}" class="course-btn">Начать обучение</a>
       {% else %}
         <button class="course-btn course-btn-disabled" disabled>Требуется авторизация</button>
       {% endif %}
@@ -49,7 +49,7 @@
       <h3 class="course-name">Веб-разработка</h3>
       <p class="course-description">HTML, CSS, JavaScript с нуля</p>
       {% if user.is_authenticated %}
-        <a href="{% url 'prac:course_program' course_id=2 %}" class="course-btn">Начать обучение</a>
+        <a href="{% url 'task_mananger:course_program' course_id=2 %}" class="course-btn">Начать обучение</a>
       {% else %}
         <button class="course-btn course-btn-disabled" disabled>Требуется авторизация</button>
       {% endif %}
@@ -60,7 +60,7 @@
       <h3 class="course-name">Базы данных</h3>
       <p class="course-description">SQL и работа с базами данных</p>
       {% if user.is_authenticated %}
-        <a href="{% url 'prac:course_program' course_id=3 %}" class="course-btn">Начать обучение</a>
+        <a href="{% url 'task_mananger:course_program' course_id=3 %}" class="course-btn">Начать обучение</a>
       {% else %}
         <button class="course-btn course-btn-disabled" disabled>Требуется авторизация</button>
       {% endif %}
