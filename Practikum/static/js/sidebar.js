@@ -4,6 +4,13 @@
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const collapseBtn = document.getElementById('collapseBtn');
 
+    // Автоматически сворачивать sidebar при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+            sidebar.classList.add('collapsed');
+        }
+    });
     // Открытие/закрытие на мобильных
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
