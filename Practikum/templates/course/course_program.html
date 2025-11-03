@@ -23,17 +23,35 @@
     </div>
 
     <div class="topics-grid">
-        {% for topic in topics %}
+        {% for topic in topics reversed %}
         <div class="topic-card">
             <div class="topic-image">
-                <!-- Placeholder для изображения -->
+                {% if topic.image %}
+                    <img src="{{ topic.image.url }}" alt="{{ topic.name }}">
+                {% else %}
+                    <div class="placeholder-icon">
+                        {% if 'основы' in topic.name.lower %}
+                            📚
+                        {% elif 'конструкции' in topic.name.lower %}
+                            🔀
+                        {% elif 'функции' in topic.name.lower %}
+                            ⚙️
+                        {% else %}
+                            📖
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
+
             <div class="topic-footer">
                 <span class="topic-label">{{ topic.name }}</span>
             </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'task_mananger:course_task' course_program_id=1 %}" class="course-btn">Начать обучение</a>
+            {% else %}
+                <button class="course-btn course-btn-disabled" disabled>Требуется авторизация</button>
+            {% endif %}
         </div>
-        {% empty %}
-        <p> )))))))))))))))) </p>
         {% endfor %}
     </div>
 </div>

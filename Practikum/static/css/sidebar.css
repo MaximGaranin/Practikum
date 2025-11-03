@@ -151,7 +151,7 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #409eff 0%, #2178c7 100%);
+    background: rgba(255, 86, 48, 1);
     display: flex;
     align-items: center;
     justify-content: center;

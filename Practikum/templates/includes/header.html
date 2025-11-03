@@ -1,16 +1,76 @@
-<header class="site-header">
-  <div class="header-container">
-      <a href="/" class="header-brand">
-          <span class="brand-icon">PR</span>
-          <span class="brand-text">Practikum</span>
-      </a>
-      
-      <nav class="header-nav">
-          <a href="#" class="nav-link">Мои курсы</a>
-          <a href="#" class="nav-link">Все курсы</a>
-          <div class="user-avatar">
-              <span>👤</span>
-          </div>
-      </nav>
-  </div>
-</header>
+    <header class="site-header">
+        <div class="header-container">
+            <!-- Левая часть: Логотип -->
+            <div class="header-left">
+                <a href="#" class="header-brand">
+                    <div class="brand-logo">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <circle cx="16" cy="16" r="16" fill="#FF5630"/>
+                            <path d="M16 8L20 16L16 24L12 16L16 8Z" fill="white"/>
+                        </svg>
+                    </div>
+                    <span class="brand-text">Практикум</span>
+                </a>
+            </div>
+
+            <!-- Правая часть: Меню и аватар -->
+            <div class="header-right">
+                <button class="dropdown-btn">
+                    <span>Мои курсы</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                
+                <a href="#" class="text-link">Все курсы</a>
+                
+                <button class="user-avatar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="11" fill="#32B8C6"/>
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="white"/>
+                    </svg>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <nav class="mobile-nav">
+            <a href="#" class="mobile-nav-item">Мои курсы</a>
+            <a href="#" class="mobile-nav-item">Все курсы</a>
+        </nav>
+    </header>
+
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const mobileNav = document.querySelector('.mobile-nav');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            mobileNav.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mobile-menu-btn') && !e.target.closest('.mobile-nav')) {
+                mobileMenuBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+            }
+        });
+
+        // Close mobile menu on resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                mobileMenuBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+            }
+        });
+    </script>

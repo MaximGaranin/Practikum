@@ -22,18 +22,6 @@ def course(request):
     return render(request, 'course/course.html')
 
 
-def course_program(request, course_id=None):
-    """Страница программы курса."""
-    # Генерируем 12 тем для примера
-    topics = [{'id': i, 'name': f'Тема {i}'} for i in range(1, 13)]
-
-    context = {
-        'topics': topics,
-        'course_id': course_id,
-    }
-    return render(request, 'course/course_program.html', context)
-
-
 def profile(request, username):
     """Страница профиля пользователя."""
     profile_user = get_object_or_404(User, username=username)
