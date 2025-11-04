@@ -8,6 +8,7 @@ class Task(models.Model):
 
 class Topic(models.Model):
     name = models.TextField()
+    image = models.ImageField(upload_to='topics/', blank=True, null=True)
     tasks = models.ManyToManyField(Task)
 
 

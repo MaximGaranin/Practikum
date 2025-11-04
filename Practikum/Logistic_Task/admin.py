@@ -8,8 +8,8 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ['name']
-    fields = ['name']
+    list_display = ['name', 'image']
+    fields = ['name', 'image', 'tasks']
     filter_horizontal = ['tasks']
 
 @admin.register(Task)
