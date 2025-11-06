@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 class Task(models.Model):
     name = models.TextField()
@@ -15,3 +15,4 @@ class Topic(models.Model):
 class Course(models.Model):
     name = models.TextField()
     topics = models.ManyToManyField(Topic)
+    students = models.ManyToManyField(User, related_name='enrolled_courses', blank=True)

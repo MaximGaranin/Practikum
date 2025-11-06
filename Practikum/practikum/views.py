@@ -8,18 +8,23 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse, reverse_lazy
-
-
-
 from .forms import UserEditForm
-
+from Logistic_Task import models
 
 User = get_user_model()
 
 
 def course(request):
     """Главная страница выбора курсов."""
-    return render(request, 'course/course.html')
+    if request.user.is_authenticated:
+        courses = request.user.enrolled_courses.all()
+        context = {
+                'courses': courses,
+                'user': request.user
+            }
+        return render(request, 'course/course.html', context)
+    else:
+        return render(request, 'course/course.html')
 
 
 def profile(request, username):

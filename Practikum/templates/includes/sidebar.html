@@ -3,75 +3,50 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <aside class="sidebar" id="sidebar">
-    <nav class="sidebar-nav">
+	<nav class="sidebar-nav">
+		{% if user.is_authenticated %}
+		<div class="sidebar-section">
+			<ul class="sidebar-menu">
+				<a
+					class="sidebar-link"
+					href="{% url 'prac:profile' username=user.username %}"
+				>
+					<span class="sidebar-icon">👤</span>
+					<span class="sidebar-text">Личный кабинет</span>
+				</a>
+			</ul>
+		</div>
+		{% endif %}
 
-        <div class="sidebar-header">
-            {% if user.is_authenticated %}
-            <div class="sidebar-user">
-                <div class="sidebar-user-avatar">
-                    <span>{{ user.first_name.0|upper }}{{ user.last_name.0|upper }}</span>
-                </div>
-                <div class="sidebar-user-info">
-                    <span class="sidebar-user-name">{{ user.first_name }} {{ user.last_name }}</span>
-                </div>
-            </div>
-            {% else %}
-            <div class="sidebar-user">
-                <a href="{% url 'login' %}" class="sidebar-auth-link">
-                    <span class="sidebar-text">Войти</span>
-                </a>
-            </div>
-            {% endif %}
-        </div>
+		<div class="sidebar-section">
+			<ul class="sidebar-menu">
+				<a href="{% url 'prac:course' %}" class="sidebar-link">
+					<span class="sidebar-icon">📚</span>
+					<span class="sidebar-text">Курсы</span>
+				</a>
+			</ul>
+		</div>
 
-        {% if user.is_authenticated %}
-        <div class="sidebar-section">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item {% if 'profile' in request.path %}active{% endif %}">
-                    <a class="sidebar-link" href="{% url 'prac:profile' username=user.username %}">
-                        <span class="sidebar-icon">👤</span>
-                        <span class="sidebar-text">Личный кабинет</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        {% endif %}
+		{% if user.is_authenticated %}
+		<div class="sidebar-section">
+			<ul class="sidebar-menu">
+				<a href="{% url 'prac:task' %}" class="sidebar-link">
+					<span class="sidebar-icon">✓</span>
+					<span class="sidebar-text">Задачи</span>
+				</a>
+			</ul>
+		</div>
 
-        <div class="sidebar-section">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item {% if request.path == '/' %}active{% endif %}">
-                    <a href="{% url 'prac:course' %}" class="sidebar-link">
-                        <span class="sidebar-icon">📚</span>
-                        <span class="sidebar-text">Курсы</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        {% if user.is_authenticated %}
-        <div class="sidebar-section">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item {% if 'task' in request.path %}active{% endif %}">
-                    <a href="{% url 'prac:task' %}" class="sidebar-link">
-                        <span class="sidebar-icon">✓</span>
-                        <span class="sidebar-text">Задачи</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="sidebar-section">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item {% if 'settings' in request.path %}active{% endif %}">
-                    <a href="{% url 'prac:settings' %}" class="sidebar-link">
-                        <span class="sidebar-icon">⚙️</span>
-                        <span class="sidebar-text">Настройки</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        {% endif %}
-    </nav>
+		<div class="sidebar-section">
+			<ul class="sidebar-menu">
+				<a href="{% url 'prac:settings' %}" class="sidebar-link">
+					<span class="sidebar-icon">⚙️</span>
+					<span class="sidebar-text">Настройки</span>
+				</a>
+			</ul>
+		</div>
+		{% endif %}
+	</nav>
 </aside>
 
 <script src='{% static "js/sidebar.js" %}'></script>

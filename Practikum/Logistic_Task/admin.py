@@ -3,8 +3,12 @@ from .models import Course, Topic, Task
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name']
-    filter_horizontal = ['topics']
+    list_display = ['name', 'get_students_count']
+    filter_horizontal = ['topics', 'students']
+
+    def get_students_count(self, obj):
+        return obj.students.count()
+    get_students_count.short_description = 'Студентов'
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
