@@ -10,6 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse, reverse_lazy
 from .forms import UserEditForm
 from Logistic_Task import models
+from .models import Student, Group, Enrollment
 
 User = get_user_model()
 
@@ -27,26 +28,44 @@ def course(request):
         return render(request, 'course/course.html')
 
 
-def profile(request, username):
-    """Страница профиля пользователя."""
-    profile_user = get_object_or_404(User, username=username)
+def profile(request, username=None):
+    if username:
+        profile = get_object_or_404(User, username=username)
+    else:
+        profile = request.user
 
-    if request.method == 'POST' and request.user.is_authenticated and request.user == profile_user:
-        profile_user.first_name = request.POST.get('first_name', '').strip()
-        profile_user.last_name = request.POST.get('last_name', '').strip()
-        email = request.POST.get('email', '').strip()
+    # Получаем или создаём студента
+    try:
+        student = profile.student
+    except Student.DoesNotExist:
+        # Автоматически создаём студента для пользователя
+        student = Student.objects.create(
+            user=profile,
+            first_name=profile.first_name,
+            last_name=profile.last_name
+        )
 
-        if email:
-            profile_user.email = email
+    enrollment = Enrollment.objects.filter(student=student).first()
+    group = enrollment.group if enrollment else None
 
-        profile_user.save()
-        return redirect('prac:profile', username=username)
+    if request.method == 'POST' and request.user == profile:
+        profile.first_name = request.POST.get('first_name', '').strip()
+        profile.last_name = request.POST.get('last_name', '').strip()
+        profile.email = request.POST.get('email', '').strip()
+        profile.save()
 
-    return render(
-        request,
-        'profile/profile.html',
-        {'profile': profile_user}
-    )
+        student.first_name = profile.first_name
+        student.last_name = profile.last_name
+        student.phone_number = request.POST.get('phone_number', '').strip()
+        student.save()
+
+    context = {
+        'profile': profile,
+        'student': student,
+        'group': group,
+    }
+
+    return render(request, 'profile/profile.html', context)
 
 
 def task(request):

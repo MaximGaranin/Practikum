@@ -3,56 +3,78 @@
 
 {% block title %}
 Программа курса - Практикум
-{% endblock %}
+{% endblock title %}
 
 {% block link %}
-<link rel="stylesheet" href="{% static 'css/course_program.css' %}">
-{% endblock %}
+<link rel="stylesheet" href="{% static 'css/course_program.css' %}" />
+{% endblock link %}
 
 {% block content %}
 <div class="course-container">
-    <div class="course-header">
-        <div class="course-title-wrapper">
-            <h1 class="course-title">Курс</h1>
-            <div class="course-progress">
-                <span class="progress-circle"></span>
-                <span class="progress-text">100%</span>
-            </div>
-        </div>
-        <h2 class="section-title">Программа курса</h2>
-    </div>
+	<div class="course-header">
+		<div class="course-title-wrapper">
+			<h1 class="course-title">{{ course.name }}</h1>
+			<div class="course-progress">
+				<span class="progress-circle"></span>
+				<span class="progress-text">100%</span>
+			</div>
+		</div>
+		<h2 class="section-title">Программа курса</h2>
+	</div>
 
-    <div class="topics-grid">
-        {% for topic in topics reversed %}
-        <div class="topic-card">
-            <div class="topic-image">
-                {% if topic.image %}
-                    <img src="{{ topic.image.url }}" alt="{{ topic.name }}">
-                {% else %}
-                    <div class="placeholder-icon">
-                        {% if 'основы' in topic.name.lower %}
-                            📚
-                        {% elif 'конструкции' in topic.name.lower %}
-                            🔀
-                        {% elif 'функции' in topic.name.lower %}
-                            ⚙️
-                        {% else %}
-                            📖
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </div>
+	<div class="topics-grid">
+		{% for topic in topics %}
+		<div class="topic-card">
+			<div class="topic-image">
+				{% if topic.image %}
+				<img 
+					src="{{ topic.image.url }}" 
+					alt="{{ topic.name }}"
+					width="400"
+					height="250"
+					loading="lazy"
+				/>
+				{% else %}
+				<div class="placeholder-icon">
+					{% if 'основы' in topic.name.lower %}
+						📚
+					{% elif 'конструкции' in topic.name.lower %}
+						🔀
+					{% elif 'функции' in topic.name.lower %}
+						⚙️
+					{% else %}
+						📖
+					{% endif %}
+				</div>
+				{% endif %}
+			</div>
 
-            <div class="topic-footer">
-                <span class="topic-label">{{ topic.name }}</span>
-            </div>
-            {% if user.is_authenticated %}
-                <a href="{% url 'task_mananger:course_task' course_program_id=1 %}" class="course-btn">Начать обучение</a>
-            {% else %}
-                <button class="course-btn course-btn-disabled" disabled>Требуется авторизация</button>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
+			<div class="topic-footer">
+				<span class="topic-label">{{ topic.name }}</span>
+			</div>
+
+			{% if user.is_authenticated %}
+				{% with first_task=topic.tasks.first %}
+					{% if first_task %}
+					<a
+						href="{% url 'task_mananger:course_task' course_id=course.id task_id=first_task.id %}"
+						class="course-btn"
+					>
+						Начать обучение
+					</a>
+					{% else %}
+					<button class="course-btn course-btn-disabled" disabled>
+						Нет задач
+					</button>
+					{% endif %}
+				{% endwith %}
+			{% else %}
+			<button class="course-btn course-btn-disabled" disabled>
+				Требуется авторизация
+			</button>
+			{% endif %}
+		</div>
+		{% endfor %}
+	</div>
 </div>
-{% endblock %}
+{% endblock content %}

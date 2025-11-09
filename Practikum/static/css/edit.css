@@ -1,0 +1,327 @@
+:root {
+            --color-bg-primary: #1a1d1d;
+            --color-bg-secondary: #22262b;
+            --color-text-primary: #e8e8e8;
+            --color-text-secondary: #a7a9a9;
+            --color-border: rgba(119, 124, 124, 0.3);
+            --color-accent: #32b8c6;
+            --color-keyword: #32b8c6;
+            --color-string: #e68161;
+            --color-function: #32b8c6;
+            --color-comment: #777c7c;
+            --color-success: #32b8c6;
+            --font-family-mono: 'Courier New', Consolas, Monaco, monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 400px;
+            background-color: var(--color-bg-primary);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .task-text {
+        font-size: 14px;
+        margin: 0 0 14px 0;
+        font-weight: 400;
+        line-height: 1.7;
+        }
+
+        .lesson-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: var(--color-bg-secondary);
+            border-radius: 8px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .lesson-progress:hover {
+            background-color: rgba(50, 184, 198, 0.1);
+        }
+
+        .lesson-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lesson-number {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        .lesson-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--color-success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .task-item {
+            padding: 16px 18px;
+            background-color: rgba(50, 184, 198, 0.08);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 1px solid rgba(50, 184, 198, 0.15);
+        }
+        
+        .task-item.completed {
+            opacity: 0.7;
+        }
+
+        .task-item::before {
+            content: '✓';
+            color: var(--color-success);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            background-color: var(--color-bg-primary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-tab {
+            padding: 8px 15px;
+            background-color: var(--color-bg-secondary);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-tab.active {
+            background-color: rgba(50, 184, 198, 0.15);
+            color: var(--color-accent);
+        }
+
+        .editor-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-bg-secondary);
+        }
+
+        .code-editor {
+            flex: 1;
+            display: flex;
+            font-family: var(--font-family-mono);
+            font-size: 15px;
+            overflow: auto;
+            line-height: 1.6;
+        }
+
+        .line-numbers {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px 15px;
+            text-align: right;
+            color: #5a6164;
+            user-select: none;
+            border-right: 1px solid var(--color-border);
+            min-width: 60px;
+            font-size: 14px;
+        }
+
+        .line-number {
+            display: block;
+            line-height: 1.6;
+            height: 24px;
+        }
+
+        .code-content {
+            flex: 1;
+            padding: 20px;
+            outline: none;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+            color: var(--color-text-primary);
+        }
+
+        .code-line {
+            line-height: 1.6;
+            min-height: 24px;
+        }
+
+        .keyword {
+            color: var(--color-keyword);
+            font-weight: 600;
+        }
+
+        .string {
+            color: var(--color-string);
+        }
+
+        .function {
+            color: var(--color-function);
+        }
+
+        .comment {
+            color: var(--color-comment);
+            font-style: italic;
+        }
+
+        .output-section {
+            background-color: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            padding: 20px;
+        }
+
+        .output-header {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .output-content {
+            background-color: var(--color-bg-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: var(--font-family-mono);
+            font-size: 13px;
+            min-height: 100px;
+            color: var(--color-text-secondary);
+        }
+
+        .editor-footer {
+            background-color: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 11px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: var(--color-accent);
+            color: var(--color-bg-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #2da6b2;
+        }
+
+        .btn-secondary {
+            background-color: rgba(119, 124, 124, 0.15);
+            color: var(--color-text-primary);
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(119, 124, 124, 0.25);
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            background-color: transparent;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(119, 124, 124, 0.15);
+        }
+
+        .icon-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+
+        a.icon-btn {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        a.btn {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+                max-height: 40vh;
+                overflow-y: auto;
+            }
+        }

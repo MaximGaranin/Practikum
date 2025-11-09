@@ -8,8 +8,7 @@ app_name = 'task_mananger'
 
 urlpatterns = [
    path('course/<int:course_id>/', views.course_program, name='course_program'),
-   path('course/task/<int:course_program_id>', views.course_task, name='course_task')
-]
+   path('course/<int:course_id>/task/<int:task_id>/', views.course_task, name='course_task'),]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

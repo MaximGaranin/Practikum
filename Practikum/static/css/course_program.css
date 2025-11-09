@@ -101,23 +101,10 @@ body {
 	border: 2px solid #32b8c6;
 	border-radius: 50%;
 	background-color: transparent;
-	position: relative;
-}
-
-.progress-circle::after {
-	content: '';
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	width: 10px;
-	height: 10px;
-	background-color: #32b8c6;
-	border-radius: 50%;
 }
 
 .progress-text {
-	font-size: 16px;
+	font-size: 24px;
 	font-weight: 500;
 	color: var(--color-gray-200);
 }

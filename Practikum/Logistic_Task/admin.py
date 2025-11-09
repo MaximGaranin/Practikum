@@ -10,11 +10,13 @@ class CourseAdmin(admin.ModelAdmin):
         return obj.students.count()
     get_students_count.short_description = 'Студентов'
 
+
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     list_display = ['name', 'image']
     fields = ['name', 'image', 'tasks']
     filter_horizontal = ['tasks']
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
