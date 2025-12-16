@@ -22,11 +22,15 @@ TEMPLATES_DIR = BASE_DIR / 'templates'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-c@yv4)1#9m!9##_+&zvmd4^h@69(h!5c)#hh)r7b6%9c=&4)%3'
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ADMIN_SITE_HEADER = "Practikum Admin"
+ADMIN_SITE_TITLE = "Practikum"
+ADMIN_INDEX_TITLE = "Панель управления"
 
 # Application definition
 
@@ -41,7 +45,8 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'phonenumber_field',
     'practikum.apps.PractikumConfig',
-    'ckeditor',  # Добавьте это
+    'ckeditor',
+    'editor.apps.EditorConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,153 @@
+{% load static %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>👤 Карточка студента</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:course' %}">На сайт</a>
+            <a href="/admin/">Админка</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <a href="{% url 'prac:teacher_students' %}" class="btn btn-primary" style="margin-bottom: 20px;">← Назад к списку</a>
+
+    <!-- Информация о студенте -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Личная информация</h2>
+            <a href="/admin/practikum/student/{{ student.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
+        </div>
+        <div class="section-content">
+            <div class="student-detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Фамилия Имя</div>
+                    <div class="detail-value">{{ student.last_name }} {{ student.first_name }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Username</div>
+                    <div class="detail-value">{{ student.user.username }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ student.user.email|default:"Не указан" }}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-label">Телефон</div>
+                    <div class="detail-value">{{ student.phone_number|default:"Не указан" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Группы студента -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Группы</h2>
+        </div>
+        <div class="section-content">
+            {% if enrollments %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Группа</th>
+                            <th>Дата записи</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                        <tr>
+                            <td><strong>{{ enrollment.group.name }}</strong></td>
+                            <td>{{ enrollment.date|date:"d.m.Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👫</div>
+                <h3>Студент не записан в группы</h3>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Курсы студента -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Записан на курсы</h2>
+        </div>
+        <div class="section-content">
+            {% if courses %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Курс</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td><strong>{{ course.name }}</strong></td>
+                            <td><span class="badge badge-success">Активен</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📚</div>
+                <h3>Студент не записан на курсы</h3>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.student-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.detail-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+</style>
+{% endblock %}

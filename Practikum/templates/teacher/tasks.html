@@ -1,0 +1,316 @@
+{% load static %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>📝 Управление заданиями</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}" class="active">Задания</a>
+            <a href="{% url 'prac:course' %}">На сайт</a>
+            <a href="/admin/">Админка</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Статистика заданий -->
+    <div class="stats-grid" style="margin-bottom: 30px;">
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value">{{ tasks.count }}</div>
+            <div class="stat-label">Всего заданий</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-value">{{ topics.count }}</div>
+            <div class="stat-label">Всего тем</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value">
+                {% for topic in topics %}
+                    {% if forloop.first %}
+                        {{ topic.tasks_count }}
+                    {% endif %}
+                {% empty %}
+                    0
+                {% endfor %}
+            </div>
+            <div class="stat-label">Заданий в самой большой теме</div>
+        </div>
+    </div>
+
+    <!-- Темы с заданиями -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Темы курсов</h2>
+            <a href="/admin/Logistic_Task/topic/add/" class="btn btn-success btn-sm">+ Создать тему</a>
+        </div>
+        <div class="section-content">
+            {% if topics %}
+            <div class="topics-list">
+                {% for topic in topics %}
+                <div class="topic-item">
+                    <div class="topic-header">
+                        <div class="topic-info">
+                            {% if topic.image %}
+                            <img src="{{ topic.image.url }}" alt="{{ topic.name }}" class="topic-image">
+                            {% else %}
+                            <div class="topic-image-placeholder">📖</div>
+                            {% endif %}
+                            <div>
+                                <h3>{{ topic.name }}</h3>
+                                <p class="topic-meta">{{ topic.tasks_count }} заданий</p>
+                            </div>
+                        </div>
+                        <div class="topic-actions">
+                            <a href="/admin/Logistic_Task/topic/{{ topic.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
+                            <a href="/admin/Logistic_Task/topic/{{ topic.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📖</div>
+                <h3>Темы не созданы</h3>
+                <p>Создайте первую тему для организации заданий</p>
+                <a href="/admin/Logistic_Task/topic/add/" class="btn btn-success">+ Создать первую тему</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Список заданий -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Все задания</h2>
+            <a href="/admin/Logistic_Task/task/add/" class="btn btn-success btn-sm">+ Создать задание</a>
+        </div>
+        <div class="section-content">
+            {% if tasks %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>Название задания</th>
+                            <th style="width: 400px;">Описание</th>
+                            <th style="width: 120px;">Статус</th>
+                            <th style="width: 200px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.id }}</td>
+                            <td><strong>{{ task.name }}</strong></td>
+                            <td>
+                                {% if task.text_task %}
+                                    <div class="task-preview">
+                                        {{ task.text_task|striptags|truncatewords:15 }}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Нет описания</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.text_task %}
+                                    <span class="badge badge-success">Готово</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Не заполнено</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/admin/Logistic_Task/task/{{ task.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
+                                <a href="/admin/Logistic_Task/task/{{ task.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <h3>Задания не созданы</h3>
+                <p>Создайте первое задание для студентов</p>
+                <a href="/admin/Logistic_Task/task/add/" class="btn btn-success">+ Создать первое задание</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Быстрое создание -->
+    <div class="section">
+        <div class="section-header">
+            <h2>⚡ Быстрые действия</h2>
+        </div>
+        <div class="section-content">
+            <div class="quick-actions">
+                <a href="/admin/Logistic_Task/task/add/" class="quick-action-card">
+                    <div class="quick-action-icon">📝</div>
+                    <div class="quick-action-title">Создать задание</div>
+                    <div class="quick-action-desc">Добавить новое задание для студентов</div>
+                </a>
+                
+                <a href="/admin/Logistic_Task/topic/add/" class="quick-action-card">
+                    <div class="quick-action-icon">📖</div>
+                    <div class="quick-action-title">Создать тему</div>
+                    <div class="quick-action-desc">Организовать задания по темам</div>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Дополнительные стили для заданий */
+.topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.topic-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.topic-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topic-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.topic-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.topic-image-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.topic-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.topic-meta {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.topic-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.task-preview {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.text-muted {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Быстрые действия */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.quick-action-card {
+    background: white;
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    padding: 30px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.quick-action-card:hover {
+    border-color: var(--accent-color);
+    border-style: solid;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.quick-action-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.quick-action-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.quick-action-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .topic-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .topic-actions {
+        width: 100%;
+    }
+    
+    .topic-actions .btn {
+        flex: 1;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
