@@ -10,13 +10,12 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse, reverse_lazy
 from .forms import UserEditForm
 from Logistic_Task import models
-from .models import Student, Group, Enrollment
+from .models import Student, Group, Enrollment, Teacher, CourseTeacherGroup
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from .decorators import teacher_required
 
 User = get_user_model()
-
 
 def course(request):
     """Главная страница выбора курсов."""
@@ -115,20 +114,41 @@ def edit_profile(request, username):
 @teacher_required
 def teacher_dashboard(request):
     """Главная панель преподавателя."""
-    from Logistic_Task.models import Course, Task
+    from Logistic_Task.models import Course, Task, Topic
     
-    # Статистика
-    total_students = Student.objects.count()
-    total_courses = Course.objects.count()
-    total_tasks = Task.objects.count()
-    total_groups = Group.objects.count()
+    # Получаем текущего преподавателя
+    teacher = request.user.teacher
     
-    # Последние зарегистрированные студенты
-    recent_students = Student.objects.select_related('user').order_by('-id')[:5]
+    # Получаем все назначения этого преподавателя
+    teacher_assignments = CourseTeacherGroup.objects.filter(teacher=teacher)
     
-    # Курсы с количеством студентов
-    courses_stats = Course.objects.annotate(
-        students_count=Count('students')
+    # ID групп, курсов преподавателя
+    teacher_groups = teacher_assignments.values_list('group', flat=True)
+    teacher_courses = teacher_assignments.values_list('course', flat=True)
+    
+    # Статистика только по группам преподавателя
+    total_students = Student.objects.filter(
+        enrollment__group__id__in=teacher_groups
+    ).distinct().count()
+    
+    total_courses = Course.objects.filter(id__in=teacher_courses).count()
+    total_groups = Group.objects.filter(id__in=teacher_groups).count()
+    
+    # Задания из курсов преподавателя
+    total_tasks = Task.objects.filter(
+        topic__course__id__in=teacher_courses
+    ).distinct().count()
+    
+    # Последние студенты из групп преподавателя
+    recent_students = Student.objects.filter(
+        enrollment__group__id__in=teacher_groups
+    ).distinct().select_related('user').order_by('-id')[:5]
+    
+    # Курсы преподавателя с количеством студентов
+    courses_stats = Course.objects.filter(
+        id__in=teacher_courses
+    ).annotate(
+        students_count=Count('students', distinct=True)
     ).order_by('-students_count')[:5]
     
     context = {
@@ -138,6 +158,7 @@ def teacher_dashboard(request):
         'total_groups': total_groups,
         'recent_students': recent_students,
         'courses_stats': courses_stats,
+        'teacher': teacher,
     }
     
     return render(request, 'teacher/dashboard.html', context)
@@ -145,11 +166,21 @@ def teacher_dashboard(request):
 
 @teacher_required
 def teacher_students(request):
-    """Управление студентами."""
+    """Управление студентами преподавателя."""
+    teacher = request.user.teacher
+    
+    # Группы преподавателя
+    teacher_groups = CourseTeacherGroup.objects.filter(
+        teacher=teacher
+    ).values_list('group', flat=True)
+    
     # Поиск
     search_query = request.GET.get('search', '')
     
-    students_list = Student.objects.select_related('user').all()
+    # Только студенты из групп преподавателя
+    students_list = Student.objects.filter(
+        enrollment__group__id__in=teacher_groups
+    ).distinct().select_related('user')
     
     if search_query:
         students_list = students_list.filter(
@@ -167,6 +198,7 @@ def teacher_students(request):
     context = {
         'students': students,
         'search_query': search_query,
+        'teacher': teacher,
     }
     
     return render(request, 'teacher/students.html', context)
@@ -174,16 +206,24 @@ def teacher_students(request):
 
 @teacher_required
 def teacher_courses(request):
-    """Управление курсами."""
-    from Logistic_Task.models import Course
+    """Управление курсами преподавателя."""
+    teacher = request.user.teacher
     
-    courses = Course.objects.annotate(
-        students_count=Count('students'),
-        topics_count=Count('topics')
-    ).all()
+    # Курсы преподавателя
+    teacher_courses_ids = CourseTeacherGroup.objects.filter(
+        teacher=teacher
+    ).values_list('course', flat=True).distinct()
+    
+    courses = Course.objects.filter(
+        id__in=teacher_courses_ids
+    ).annotate(
+        students_count=Count('students', distinct=True),
+        topics_count=Count('topics', distinct=True)
+    )
     
     context = {
         'courses': courses,
+        'teacher': teacher,
     }
     
     return render(request, 'teacher/courses.html', context)
@@ -191,15 +231,32 @@ def teacher_courses(request):
 
 @teacher_required
 def teacher_tasks(request):
-    """Управление заданиями."""
-    from Logistic_Task.models import Task, Topic
+    """Управление заданиями из курсов преподавателя."""
+    from Logistic_Task.models import Course, Topic, Task
     
-    tasks = Task.objects.all()
-    topics = Topic.objects.annotate(tasks_count=Count('tasks')).all()
+    teacher = request.user.teacher
+    
+    # Курсы преподавателя
+    teacher_courses_ids = CourseTeacherGroup.objects.filter(
+        teacher=teacher
+    ).values_list('course', flat=True).distinct()
+    
+    # Задания только из курсов преподавателя
+    tasks = Task.objects.filter(
+        topic__course__id__in=teacher_courses_ids
+    ).distinct()
+    
+    # Темы из курсов преподавателя
+    topics = Topic.objects.filter(
+        course__id__in=teacher_courses_ids
+    ).annotate(
+        tasks_count=Count('tasks')
+    ).distinct()
     
     context = {
         'tasks': tasks,
         'topics': topics,
+        'teacher': teacher,
     }
     
     return render(request, 'teacher/tasks.html', context)
@@ -207,15 +264,40 @@ def teacher_tasks(request):
 
 @teacher_required
 def teacher_student_detail(request, student_id):
-    """Детальная информация о студенте."""
-    student = get_object_or_404(Student, id=student_id)
-    enrollments = Enrollment.objects.filter(student=student).select_related('group')
-    courses = student.user.enrolled_courses.all()
+    """Детальная информация о студенте (только из групп преподавателя)."""
+    teacher = request.user.teacher
+    
+    # Группы преподавателя
+    teacher_groups = CourseTeacherGroup.objects.filter(
+        teacher=teacher
+    ).values_list('group', flat=True)
+    
+    # Студент должен быть в группах преподавателя
+    student = get_object_or_404(
+        Student,
+        id=student_id,
+        enrollment__group__id__in=teacher_groups
+    )
+    
+    enrollments = Enrollment.objects.filter(
+        student=student,
+        group__id__in=teacher_groups
+    ).select_related('group')
+    
+    # Курсы преподавателя, на которые записан студент
+    teacher_courses_ids = CourseTeacherGroup.objects.filter(
+        teacher=teacher
+    ).values_list('course', flat=True)
+    
+    courses = student.user.enrolled_courses.filter(
+        id__in=teacher_courses_ids
+    )
     
     context = {
         'student': student,
         'enrollments': enrollments,
         'courses': courses,
+        'teacher': teacher,
     }
     
     return render(request, 'teacher/student_detail.html', context)

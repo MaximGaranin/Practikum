@@ -9,7 +9,7 @@ urlpatterns = [
     path('profile/<str:username>/', views.profile, name='profile'),
     path('task/', views.task, name='task'),
     path('settings/', views.settings, name='settings'),
-    path('register/', views.RegisterView.as_view(), name='register'),
+    path('registration/', views.RegisterView.as_view(), name='register'),
     path('edit/<str:username>/', views.edit_profile, name='edit_profile'),
     
     # Маршруты для преподавателя
