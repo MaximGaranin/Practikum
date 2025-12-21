@@ -113,16 +113,10 @@ class EnrollmentAdmin(admin.ModelAdmin):
 class TeacherAdmin(admin.ModelAdmin):
     """Админка преподавателей с автоматическим созданием пользователя."""
     list_display = ['id', 'last_name', 'first_name', 'user', 'phone_number', 'get_courses_count', 'get_groups_count']
-    list_display_links = ['id', 'last_name', 'first_name']
     search_fields = ['first_name', 'last_name', 'user__username', 'user__email']
-    list_filter = ['courseteachergroup__course', 'courseteachergroup__group']
     inlines = [CourseTeacherGroupInline]
     
     fieldsets = (
-        ('Учетные данные', {
-            'fields': ('user', 'username', 'email', 'password'),
-            'description': 'Оставьте поле "Пользователь" пустым для автоматического создания'
-        }),
         ('Основная информация', {
             'fields': ('first_name', 'last_name')
         }),
@@ -146,11 +140,7 @@ class TeacherAdmin(admin.ModelAdmin):
             )
         else:  # Создание нового преподавателя
             return (
-                ('Учетные данные (для нового пользователя)', {
-                    'fields': ('username', 'email', 'password'),
-                    'description': 'Эти поля используются для автоматического создания пользователя'
-                }),
-                ('Или выберите существующего', {
+                 ('Или выберите существующего', {
                     'fields': ('user',),
                 }),
                 ('Основная информация', {

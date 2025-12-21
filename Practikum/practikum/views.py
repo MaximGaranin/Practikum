@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse, reverse_lazy
 from .forms import UserEditForm
-from Logistic_Task import models
+from Logistic_Task.models import Course, Topic, Task
 from .models import Student, Group, Enrollment, Teacher, CourseTeacherGroup
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -20,6 +20,9 @@ User = get_user_model()
 def course(request):
     """Главная страница выбора курсов."""
     if request.user.is_authenticated:
+        if hasattr(request.user, 'teacher'):
+            return redirect('prac:teacher_dashboard')
+
         courses = request.user.enrolled_courses.all()
         context = {
                 'courses': courses,
@@ -67,7 +70,10 @@ def profile(request, username=None):
         'group': group,
     }
 
-    return render(request, 'profile/profile.html', context)
+    if hasattr(request.user, 'teacher'):
+        return render(request, 'teacher/profile.html', context)
+    else:
+        return render(request, 'profile/profile.html', context)
 
 
 def task(request):
@@ -114,7 +120,6 @@ def edit_profile(request, username):
 @teacher_required
 def teacher_dashboard(request):
     """Главная панель преподавателя."""
-    from Logistic_Task.models import Course, Task, Topic
     
     # Получаем текущего преподавателя
     teacher = request.user.teacher
