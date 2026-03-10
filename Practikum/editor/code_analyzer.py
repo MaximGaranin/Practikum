@@ -8,7 +8,7 @@ class CodeAnalyzer:
     # Библиотеки, недоступные в Pyodide
     PYODIDE_UNSUPPORTED = {
         'subprocess', 'multiprocessing', 'threading', 'os',
-        'sys', 'socket', 'ssl', 'sqlite3', 'psycopg2',
+        'socket', 'ssl', 'sqlite3', 'psycopg2',
         'mysql', 'django', 'flask', 'fastapi'
     }
     

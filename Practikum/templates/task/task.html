@@ -11,12 +11,11 @@
         <p class="task-subtitle">Отслеживайте прогресс выполнения заданий</p>
     </div>
 
-    <!-- Фильтры задач -->
+    <!-- Фильтры -->
     <div class="task-filters">
         <button class="filter-btn active" data-filter="all">Все задачи</button>
         <button class="filter-btn" data-filter="active">Активные</button>
         <button class="filter-btn" data-filter="completed">Выполненные</button>
-        <button class="filter-btn" data-filter="overdue">Просроченные</button>
     </div>
 
     <!-- Статистика -->
@@ -24,112 +23,67 @@
         <div class="stat-card">
             <div class="stat-icon">📝</div>
             <div class="stat-content">
-                <div class="stat-value">12</div>
+                <div class="stat-value">{{ total }}</div>
                 <div class="stat-label">Всего задач</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">✅</div>
             <div class="stat-content">
-                <div class="stat-value">8</div>
+                <div class="stat-value">{{ completed }}</div>
                 <div class="stat-label">Выполнено</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon">🔄</div>
             <div class="stat-content">
-                <div class="stat-value">3</div>
+                <div class="stat-value">{{ in_progress }}</div>
                 <div class="stat-label">В процессе</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⏰</div>
-            <div class="stat-content">
-                <div class="stat-value">1</div>
-                <div class="stat-label">Просрочено</div>
             </div>
         </div>
     </div>
 
     <!-- Список задач -->
     <div class="tasks-list">
-        <!-- Задача 1 - Активная -->
-        <div class="task-item" data-status="active">
+        {% for item in tasks_data %}
+        <div class="task-item" data-status="{% if item.is_completed %}completed{% elif item.attempts > 0 %}active{% else %}active{% endif %}">
             <div class="task-checkbox">
-                <input type="checkbox" id="task1">
-                <label for="task1"></label>
+                <input type="checkbox" id="task{{ item.task.id }}"
+                       {% if item.is_completed %}checked disabled{% endif %}>
+                <label for="task{{ item.task.id }}"></label>
             </div>
             <div class="task-content">
-                <h3 class="task-name">Выполнить задание по Python</h3>
-                <p class="task-description">Написать программу для сортировки массива</p>
+                <h3 class="task-name {% if item.is_completed %}completed-text{% endif %}">
+                    {{ item.task.name }}
+                </h3>
                 <div class="task-meta">
-                    <span class="task-course">📚 Python для начинающих</span>
-                    <span class="task-deadline">До: 30 окт 2025</span>
+                    <span class="task-course">📚 {{ item.task.topic_set.first.course_set.first.name|default:"Курс" }}</span>
+                    {% if item.is_completed %}
+                        <span class="task-deadline">Выполнено: {{ item.completed_at|date:"d M Y" }}</span>
+                    {% elif item.attempts > 0 %}
+                        <span class="task-deadline">Попыток: {{ item.attempts }}</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="task-status">
-                <span class="status-badge status-active">Активна</span>
+                {% if item.is_completed %}
+                    <span class="status-badge status-completed">Выполнена</span>
+                {% else %}
+                    <span class="status-badge status-active">Активна</span>
+                {% endif %}
+                <a href="{% url 'task_mananger:course_task' course_id=item.task.topic_set.first.course_set.first.id task_id=item.task.id %}"
+                   class="btn-open">Открыть →</a>
             </div>
         </div>
-
-        <!-- Задача 2 - Выполнена -->
-        <div class="task-item" data-status="completed">
-            <div class="task-checkbox">
-                <input type="checkbox" id="task2" checked>
-                <label for="task2"></label>
-            </div>
-            <div class="task-content">
-                <h3 class="task-name completed-text">Изучить HTML теги</h3>
-                <p class="task-description">Пройти все основные HTML теги</p>
-                <div class="task-meta">
-                    <span class="task-course">🌐 Веб-разработка</span>
-                    <span class="task-deadline">Выполнено: 28 окт 2025</span>
-                </div>
-            </div>
-            <div class="task-status">
-                <span class="status-badge status-completed">Выполнена</span>
-            </div>
+        {% empty %}
+        <div style="text-align:center; padding: 40px; color: #888;">
+            <p>У вас пока нет задач.<br>Запишитесь на курс чтобы начать.</p>
+            <a href="{% url 'prac:course' %}" class="filter-btn active">К курсам</a>
         </div>
-
-        <!-- Задача 3 - Просроченная -->
-        <div class="task-item" data-status="overdue">
-            <div class="task-checkbox">
-                <input type="checkbox" id="task3">
-                <label for="task3"></label>
-            </div>
-            <div class="task-content">
-                <h3 class="task-name">Создать базу данных</h3>
-                <p class="task-description">Спроектировать и создать БД для интернет-магазина</p>
-                <div class="task-meta">
-                    <span class="task-course">🗄️ Базы данных</span>
-                    <span class="task-deadline">Просрочено: 27 окт 2025</span>
-                </div>
-            </div>
-            <div class="task-status">
-                <span class="status-badge status-overdue">Просрочена</span>
-            </div>
-        </div>
-
-        <!-- Задача 4 - Активная -->
-        <div class="task-item" data-status="active">
-            <div class="task-checkbox">
-                <input type="checkbox" id="task4">
-                <label for="task4"></label>
-            </div>
-            <div class="task-content">
-                <h3 class="task-name">Практика CSS Grid</h3>
-                <p class="task-description">Создать макет страницы используя CSS Grid</p>
-                <div class="task-meta">
-                    <span class="task-course">🌐 Веб-разработка</span>
-                    <span class="task-deadline">До: 02 ноя 2025</span>
-                </div>
-            </div>
-            <div class="task-status">
-                <span class="status-badge status-active">Активна</span>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
 <script src='{% static "js/task.js" %}'></script>
 {% endblock %}
+

@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.db import models, transaction
-from Logistic_Task.models import Course, Topic, Task
+from Logistic_Task.models import Course, Topic, Task, UserTaskProgress
 from .models import (
     Student, Group, Enrollment, Teacher, CourseTeacherGroup
 )
@@ -285,7 +285,7 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     """Админка тем."""
-    list_display = ['id', 'name', 'image', 'get_tasks_count']
+    list_display = ['id', 'name', 'image', 'get_tasks_count', 'order']
     list_display_links = ['id', 'name']
     search_fields = ['name']
     filter_horizontal = ['tasks']
@@ -309,22 +309,27 @@ class TopicAdmin(admin.ModelAdmin):
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     """Админка заданий."""
-    list_display = ['id', 'name', 'get_short_text']
+    list_display = ['id', 'name', 'order', 'get_short_text']
     list_display_links = ['id', 'name']
     search_fields = ['name', 'text_task']
-    
+    ordering = ['order']
+
     fieldsets = (
         (None, {
-            'fields': ('name',)
+            'fields': ('name', 'order')
         }),
-        ('Содержание', {
+        ('Содержание задания', {
             'fields': ('text_task',),
             'classes': ('wide',)
         }),
+        ('Редактор кода', {
+            'fields': ('initial_code', 'expected_output'),
+            'classes': ('wide',),
+            'description': 'initial_code — стартовый код в редакторе. expected_output — ожидаемый вывод для проверки.'
+        }),
     )
-    
+
     def get_short_text(self, obj):
-        """Короткое описание задания."""
         if obj.text_task:
             import re
             text = re.sub('<[^<]+?>', '', obj.text_task)
@@ -356,6 +361,13 @@ class TeacherInline(admin.StackedInline):
 class CustomUserAdmin(BaseUserAdmin):
     """Расширенная админка пользователей."""
     inlines = (StudentInline, TeacherInline)
+
+@admin.register(UserTaskProgress)
+class UserTaskProgressAdmin(admin.ModelAdmin):
+    list_display = ['user', 'task', 'is_completed', 'attempts', 'completed_at']
+    list_filter = ['is_completed']
+    search_fields = ['user__username', 'task__name']
+    readonly_fields = ['completed_at', 'attempts']
 
 
 # Перерегистрируем User с новыми inline

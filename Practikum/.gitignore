@@ -41,3 +41,6 @@ db.sqlite3-journal
 # OS
 .DS_Store
 Thumbs.db
+
+Practikum/static/pyodide/
+Practikum/static/codemirror/

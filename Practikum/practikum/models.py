@@ -77,9 +77,9 @@ class Teacher(models.Model):
 
 
 class CourseTeacherGroup(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, verbose_name='Преподаватель', default='Преподаватель')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курсы', default='Курсы')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Группы', default='Группы')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, verbose_name='Преподаватель')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курсы')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Группы')
     start_date = models.DateField(auto_now_add=True, verbose_name='Дата начала')
     
     @property

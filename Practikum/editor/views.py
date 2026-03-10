@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 
-from .code_analyzer import CodeAnalyzer
 from .docker_executor import DockerExecutor
 
 def editor_view(request):
@@ -23,7 +22,7 @@ def analyze_code(request):
                 'error': 'Код не может быть пустым'
             }, status=400)
         
-        # Анализ кода
+        from .code_analyzer import CodeAnalyzer
         analyzer = CodeAnalyzer(code)
         result = analyzer.analyze()
         
@@ -50,16 +49,9 @@ def execute_code(request):
                 'error': 'Код не может быть пустым'
             }, status=400)
         
-        # Сначала анализируем код
-        analyzer = CodeAnalyzer(code)
-        analysis = analyzer.analyze()
-        
-        # Выполняем в Docker
+        # Просто запускаем код без анализа
         executor = DockerExecutor()
         result = executor.execute(code)
-        
-        # Добавляем информацию об анализе
-        result['analysis'] = analysis
         result['execution_mode'] = 'server'
         
         return JsonResponse(result)

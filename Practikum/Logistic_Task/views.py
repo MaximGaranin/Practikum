@@ -156,124 +156,89 @@ def execute_code(request):
 
 @require_http_methods(["POST"])
 def check_task(request):
-    """Проверка правильности решения задания"""
     try:
         data = json.loads(request.body)
         task_id = data.get('task_id')
         code = data.get('code', '')
         output = data.get('output', '')
-        
+
         task = get_object_or_404(models.Task, id=task_id)
-        
-        # Проверка решения
+
         is_correct = False
         feedback_message = ''
-        
-        # Вариант 1: Если у вас есть поле expected_output в модели Task
-        if hasattr(task, 'expected_output') and task.expected_output:
+
+        if task.expected_output:
             is_correct = output.strip() == task.expected_output.strip()
-            if is_correct:
-                feedback_message = '🎉 Отличная работа! Задание решено правильно!'
-            else:
-                feedback_message = '⚠️ Результат не совпадает с ожидаемым. Попробуйте еще раз.'
-        
-        # Вариант 2: Если у вас есть тестовые случаи
-        elif hasattr(task, 'test_cases') and task.test_cases:
-            # Здесь можно добавить логику проверки по тест-кейсам
-            is_correct = True  # Заглушка
-            feedback_message = 'Код выполнен успешно!'
-        
-        # Вариант 3: Просто проверяем, что код выполнился без ошибок
+            feedback_message = '🎉 Задание решено правильно!' if is_correct else '⚠️ Результат не совпадает. Попробуйте ещё раз.'
         else:
-            is_correct = 'error' not in output.lower() and output.strip() != ''
-            if is_correct:
-                feedback_message = '✓ Код выполнен успешно!'
-            else:
-                feedback_message = 'Код выполнен, но проверьте результат.'
-        
-        # Сохранение прогресса пользователя (опционально)
-        if request.user.is_authenticated and is_correct:
-            # Здесь можно добавить логику сохранения прогресса
-            # Например, создать модель UserTaskProgress
-            pass
-        
+            is_correct = bool(output.strip()) and 'error' not in output.lower()
+            feedback_message = '✓ Код выполнен успешно!' if is_correct else 'Проверьте результат.'
+
+        # Сохраняем прогресс
+        if request.user.is_authenticated:
+            from django.utils.timezone import now
+            progress, created = models.UserTaskProgress.objects.get_or_create(
+                user=request.user,
+                task=task
+            )
+            progress.code = code
+            progress.attempts += 1
+            if is_correct and not progress.is_completed:
+                progress.is_completed = True
+                progress.completed_at = now()
+            progress.save()
+
         return JsonResponse({
             'correct': is_correct,
             'message': feedback_message,
             'task_completed': is_correct
         })
-        
+
     except json.JSONDecodeError:
-        return JsonResponse({
-            'error': 'Неверный формат данных'
-        }, status=400)
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
-        return JsonResponse({
-            'error': f'Ошибка проверки: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Ошибка проверки: {str(e)}'}, status=500)
 
 
 @require_http_methods(["POST"])
 def save_code(request):
-    """Сохранение кода пользователя (опционально)"""
     try:
         if not request.user.is_authenticated:
-            return JsonResponse({
-                'error': 'Требуется авторизация'
-            }, status=401)
-        
+            return JsonResponse({'error': 'Требуется авторизация'}, status=401)
+
         data = json.loads(request.body)
         task_id = data.get('task_id')
         code = data.get('code', '')
-        
+
         task = get_object_or_404(models.Task, id=task_id)
-        
-        # Здесь можно сохранить код пользователя в базу данных
-        # Например, создать модель UserCode:
-        # UserCode.objects.update_or_create(
-        #     user=request.user,
-        #     task=task,
-        #     defaults={'code': code}
-        # )
-        
-        return JsonResponse({
-            'success': True,
-            'message': 'Код сохранен'
-        })
-        
+
+        progress, _ = models.UserTaskProgress.objects.get_or_create(
+            user=request.user,
+            task=task
+        )
+        progress.code = code
+        progress.save()
+
+        return JsonResponse({'success': True, 'message': 'Код сохранён'})
+
     except Exception as e:
-        return JsonResponse({
-            'error': f'Ошибка сохранения: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Ошибка сохранения: {str(e)}'}, status=500)
 
 
 @require_http_methods(["GET"])
 def load_saved_code(request, task_id):
-    """Загрузка сохраненного кода пользователя (опционально)"""
     try:
         if not request.user.is_authenticated:
-            return JsonResponse({
-                'code': None
-            })
-        
+            return JsonResponse({'code': None})
+
         task = get_object_or_404(models.Task, id=task_id)
-        
-        # Здесь можно загрузить сохраненный код из базы данных
-        # saved_code = UserCode.objects.filter(
-        #     user=request.user,
-        #     task=task
-        # ).first()
-        
-        # if saved_code:
-        #     return JsonResponse({
-        #         'code': saved_code.code
-        #     })
-        
-        return JsonResponse({
-            'code': None
-        })
-        
+        progress = models.UserTaskProgress.objects.filter(
+            user=request.user,
+            task=task
+        ).first()
+
+        return JsonResponse({'code': progress.code if progress else None})
+
     except Exception as e:
-        return JsonResponse({
-            'error': f'Ошибка загрузки: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Ошибка загрузки: {str(e)}'}, status=500)
+

@@ -28,9 +28,6 @@ class DockerExecutor:
             import time
             start_time = time.time()
             
-            # Экранирование кода для передачи в контейнер
-            escaped_code = code.replace('"', '\\"').replace('$', '\\$')
-            
             # Запуск контейнера с ограничениями
             container = self.client.containers.run(
                 image='python:3.11-alpine',

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.timezone import now
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, login
@@ -11,9 +11,10 @@ from django.urls import reverse, reverse_lazy
 from .forms import UserEditForm
 from Logistic_Task.models import Course, Topic, Task
 from .models import Student, Group, Enrollment, Teacher, CourseTeacherGroup
-from django.db.models import Count, Q
 from django.http import JsonResponse
 from .decorators import teacher_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 
 User = get_user_model()
 
@@ -76,14 +77,87 @@ def profile(request, username=None):
         return render(request, 'profile/profile.html', context)
 
 
+@login_required
 def task(request):
-    """Задачи."""
-    return render(request, 'task/task.html')
+    """Страница ДЗ пользователя."""
+    from Logistic_Task.models import Task, UserTaskProgress
+
+    # Все задачи из курсов пользователя
+    user_courses = request.user.enrolled_courses.all()
+    all_tasks = Task.objects.filter(
+        topic__course__in=user_courses
+    ).distinct()
+
+    # Прогресс пользователя
+    progress_qs = UserTaskProgress.objects.filter(
+        user=request.user,
+        task__in=all_tasks
+    ).select_related('task')
+    progress_map = {p.task_id: p for p in progress_qs}
+
+    # Собираем итоговый список
+    tasks_data = []
+    for t in all_tasks:
+        progress = progress_map.get(t.id)
+        tasks_data.append({
+            'task': t,
+            'is_completed': progress.is_completed if progress else False,
+            'attempts': progress.attempts if progress else 0,
+            'completed_at': progress.completed_at if progress else None,
+        })
+
+    total = len(tasks_data)
+    completed = sum(1 for t in tasks_data if t['is_completed'])
+    in_progress = sum(1 for t in tasks_data if t['attempts'] > 0 and not t['is_completed'])
+
+    context = {
+        'tasks_data': tasks_data,
+        'total': total,
+        'completed': completed,
+        'in_progress': in_progress,
+    }
+    return render(request, 'task/task.html', context)
 
 
+@login_required
 def settings(request):
-    """Настройки."""
-    return render(request, 'settings/settings.html')
+    user = request.user
+    password_error = None
+    password_success = None
+    delete_error = None
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # Смена пароля
+        if action == 'change_password':
+            form = PasswordChangeForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                update_session_auth_hash(request, form.user)
+                password_success = 'Пароль успешно изменён'
+            else:
+                password_error = ' '.join(
+                    [e for errors in form.errors.values() for e in errors]
+                )
+
+        # Удаление аккаунта
+        elif action == 'delete_account':
+            confirm = request.POST.get('confirm_delete')
+            if confirm == 'DELETE':
+                user.delete()
+                from django.contrib.auth import logout
+                logout(request)
+                return redirect('prac:course')
+            else:
+                delete_error = 'Введите DELETE для подтверждения'
+
+    context = {
+        'password_error': password_error,
+        'password_success': password_success,
+        'delete_error': delete_error,
+    }
+    return render(request, 'settings/settings.html', context)
 
 
 class RegisterView(CreateView):
@@ -113,7 +187,6 @@ def edit_profile(request, username):
         form.save()
         return redirect('prac:profile', username=username)
 
-    return render(request, 'registration/user.html', {'form': form})
     return render(request, 'registration/user.html', {'form': form})
 
 

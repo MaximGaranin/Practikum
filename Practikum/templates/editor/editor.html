@@ -6,47 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Editor</title>
     
-    <!-- Ваши стили -->
     <link rel="stylesheet" href="{% static 'css/edit.css' %}">
     
     <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="{% static 'codemirror/lib/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'codemirror/theme/monokai.css' %}">    
     
     <style>
-        /* Стили для интеграции CodeMirror */
         .code-editor {
             display: flex;
             position: relative;
             height: 100%;
             background: #272822;
         }
-        
-        .code-content {
-            display: none; /* Скрываем старый редактор */
-        }
-        
-        .line-numbers {
-            display: none; /* CodeMirror имеет свои номера строк */
-        }
-        
+        .code-content { display: none; }
+        .line-numbers { display: none; }
         .CodeMirror {
             height: 100% !important;
             width: 100%;
             font-size: 14px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
-        
         .CodeMirror-gutters {
             background: #272822;
             border-right: 1px solid #3c3c3c;
         }
-        
-        .CodeMirror-linenumber {
-            color: #75715e;
-        }
-        
-        /* Стили для вывода */
+        .CodeMirror-linenumber { color: #75715e; }
         .output-content {
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             white-space: pre-wrap;
@@ -56,20 +41,9 @@
             overflow-y: auto;
             min-height: 150px;
         }
-        
-        .output-success {
-            color: #89d185;
-        }
-        
-        .output-error {
-            color: #f48771;
-        }
-        
-        .output-info {
-            color: #61dafb;
-        }
-        
-        /* Индикатор режима выполнения */
+        .output-success { color: #89d185; }
+        .output-error { color: #f48771; }
+        .output-info { color: #61dafb; }
         .execution-mode {
             display: inline-block;
             padding: 4px 8px;
@@ -79,23 +53,9 @@
             margin-left: 10px;
             text-transform: uppercase;
         }
-        
-        .mode-client {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .mode-server {
-            background: #2196f3;
-            color: white;
-        }
-        
-        .mode-loading {
-            background: #ff9800;
-            color: white;
-        }
-        
-        /* Лоадер */
+        .mode-client { background: #4caf50; color: white; }
+        .mode-server { background: #2196f3; color: white; }
+        .mode-loading { background: #ff9800; color: white; }
         .spinner {
             display: inline-block;
             width: 14px;
@@ -106,40 +66,26 @@
             animation: spin 0.8s linear infinite;
             margin-right: 5px;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Адаптация под существующий дизайн */
+        @keyframes spin { to { transform: rotate(360deg); } }
         .editor-section {
             display: flex;
             flex-direction: column;
             height: calc(100vh - 200px);
             gap: 10px;
         }
-        
-        .code-editor {
-            flex: 1.5;
-            min-height: 400px;
-        }
-        
+        .code-editor { flex: 1.5; min-height: 400px; }
         .output-section {
             flex: 1;
             min-height: 200px;
             display: flex;
             flex-direction: column;
         }
-        
         .output-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        .output-content {
-            flex: 1;
-        }
+        .output-content { flex: 1; }
     </style>
 </head>
 <body>
@@ -166,24 +112,22 @@
 
         <main class="main-content">
             <div class="editor-header">
-                <div class="file-tab active">
-                    main.py
-                </div>
+                <div class="file-tab active">main.py</div>
             </div>
 
             <div class="editor-section">
                 <div class="code-editor">
-                    <!-- Скрытый textarea для CodeMirror -->
                     <textarea id="codeEditor" style="display: none;">{{ task.initial_code }}</textarea>
                 </div>
 
                 <div class="output-section">
                     <div class="output-header">
                         <span>Результат</span>
+                        <span id="executionMode" class="execution-mode mode-loading">Готов</span>
                         <span id="executionTime" style="font-size: 12px; color: #858585;"></span>
                     </div>
                     <div class="output-content" id="output">
-                        Нажмите "Проверить" для запуска кода
+                        Нажмите "Запустить" или "Проверить" для запуска кода
                     </div>
                 </div>
             </div>
@@ -209,7 +153,8 @@
                     {% else %}
                     <button class="icon-btn" disabled style="opacity: 0.3;">→</button>
                     {% endif %}
-                    
+
+                    <button class="btn btn-secondary" id="justRunButton" onclick="justRunCode()">▶ Запустить</button>
                     <button class="btn btn-primary" id="runButton" onclick="runCode()">Проверить</button>
                     
                     {% if next_task %}
@@ -222,28 +167,26 @@
         </main>
     </div>
 
-    <!-- Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
-    
-    <!-- CodeMirror -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
-    
+   <!-- Pyodide — локально -->
+    <script src="{% static 'pyodide/pyodide.js' %}"></script>
+
+    <!-- CodeMirror — локально -->
+    <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+    <script src="{% static 'codemirror/mode/python/python.js' %}"></script>
+    <script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
+    <script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>    
+
     <script>
-        // ==================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ====================
         let editor;
         let pyodide = null;
         let pyodideLoading = false;
         const initialCode = `{{ task.initial_code|default:"def pay_bills(month, bills):\n    if month % 3 == 0:\n        return bills[1:-1]\n    else:\n        return [bills[0], bills[-1]]\n\n\n# Вызов функции:\nprint(pay_bills(6, ['Интернет', 'Коммуналка', 'Телефон', 'Страховка']))" }}`;
-        
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+
         document.addEventListener('DOMContentLoaded', function() {
             initializeEditor();
-            loadPyodide();
+            initPyodide();
         });
-        
+
         function initializeEditor() {
             editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
                 mode: 'python',
@@ -262,43 +205,34 @@
                             cm.replaceSelection("    ", "end");
                         }
                     },
-                    "Shift-Tab": function(cm) {
-                        cm.indentSelection("subtract");
-                    },
-                    "Ctrl-Enter": function(cm) {
-                        runCode();
-                    },
-                    "Cmd-Enter": function(cm) {
-                        runCode();
-                    }
+                    "Shift-Tab": function(cm) { cm.indentSelection("subtract"); },
+                    "Ctrl-Enter": function(cm) { runCode(); },
+                    "Cmd-Enter": function(cm) { runCode(); }
                 }
             });
-            
             updateExecutionMode('Готов', 'loading');
         }
-        
+
         // ==================== ЗАГРУЗКА PYODIDE ====================
-        async function loadPyodide() {
+        // ВАЖНО: функция называется initPyodide, чтобы не конфликтовать
+        // с глобальной loadPyodide из библиотеки Pyodide
+
+        async function initPyodide() {
             if (pyodide || pyodideLoading) return;
-            
             pyodideLoading = true;
             updateExecutionMode('Загрузка Pyodide...', 'loading');
-            
             try {
                 pyodide = await loadPyodide({
-                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                indexURL: "{% static 'pyodide/' %}"  // ← локальный путь
                 });
-                
-                console.log('✓ Pyodide загружен');
                 updateExecutionMode('Готов (Гибрид)', 'client');
             } catch (error) {
                 console.error('Ошибка загрузки Pyodide:', error);
                 updateExecutionMode('Готов (Сервер)', 'server');
             }
-            
             pyodideLoading = false;
         }
-        
+
         // ==================== CSRF TOKEN ====================
         function getCookie(name) {
             let cookieValue = null;
@@ -314,57 +248,94 @@
             }
             return cookieValue;
         }
-        
-        // ==================== ГЛАВНАЯ ФУНКЦИЯ ВЫПОЛНЕНИЯ ====================
-        async function runCode() {
+
+        // ==================== ЗАПУСТИТЬ БЕЗ ПРОВЕРКИ ====================
+        async function justRunCode() {
             const code = editor.getValue().trim();
-            
             if (!code) {
                 displayOutput('⚠ Введите код для выполнения', 'error');
                 return;
             }
-            
-            // Блокировка кнопки
-            const runBtn = document.getElementById('runButton');
-            const originalText = runBtn.innerHTML;
-            runBtn.disabled = true;
-            runBtn.innerHTML = '<span class="spinner"></span> Выполнение...';
-            
+
+            const btn = document.getElementById('justRunButton');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Выполнение...';
             displayOutput('Анализ кода...', 'info');
             updateExecutionMode('Анализ...', 'loading');
-            
+
             try {
-                // Анализ кода на сервере
                 const analysisResponse = await fetch('{% url "task_mananger:analyze_code" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ 
-                        code: code,
-                        task_id: {{ task.id }}
-                    })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
                 });
-                
-                if (!analysisResponse.ok) {
-                    throw new Error('Ошибка анализа кода');
-                }
-                
+
+                if (!analysisResponse.ok) throw new Error('Ошибка анализа кода');
                 const analysis = await analysisResponse.json();
-                
                 if (analysis.error) {
                     displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
                     return;
                 }
-                
-                // Выбор режима выполнения
+
+                // Выбор режима — БЕЗ checkTaskResult (false)
                 if (analysis.execution_mode === 'client' && pyodide) {
-                    await executeInBrowser(code, analysis);
+                    await executeInBrowser(code, analysis, false);
                 } else {
-                    await executeOnServer(code, analysis);
+                    await executeOnServer(code, analysis, false);
                 }
-                
+
+            } catch (error) {
+                displayOutput(`❌ Ошибка: ${error.message}`, 'error');
+                updateExecutionMode('Ошибка', 'loading');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // ==================== ПРОВЕРИТЬ ====================
+        async function runCode() {
+            const code = editor.getValue().trim();
+            if (!code) {
+                displayOutput('⚠ Введите код для выполнения', 'error');
+                return;
+            }
+
+            const runBtn = document.getElementById('runButton');
+            const originalText = runBtn.innerHTML;
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<span class="spinner"></span> Выполнение...';
+            displayOutput('Анализ кода...', 'info');
+            updateExecutionMode('Анализ...', 'loading');
+
+            try {
+                const analysisResponse = await fetch('{% url "task_mananger:analyze_code" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
+                });
+
+                if (!analysisResponse.ok) throw new Error('Ошибка анализа кода');
+                const analysis = await analysisResponse.json();
+                if (analysis.error) {
+                    displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
+                    return;
+                }
+
+                // Выбор режима — С checkTaskResult (true)
+                if (analysis.execution_mode === 'client' && pyodide) {
+                    await executeInBrowser(code, analysis, true);
+                } else {
+                    await executeOnServer(code, analysis, true);
+                }
+
             } catch (error) {
                 displayOutput(`❌ Ошибка: ${error.message}`, 'error');
                 updateExecutionMode('Ошибка', 'loading');
@@ -373,44 +344,35 @@
                 runBtn.innerHTML = originalText;
             }
         }
-        
+
         // ==================== ВЫПОЛНЕНИЕ В БРАУЗЕРЕ ====================
-        async function executeInBrowser(code, analysis) {
+        async function executeInBrowser(code, analysis, checkResult) {
             updateExecutionMode('Браузер', 'client');
             displayOutput('⚡ Выполнение в браузере...\n', 'info');
-            
             const startTime = performance.now();
-            
             try {
-                // Перенаправление stdout
                 pyodide.runPython(`
 import sys
 from io import StringIO
 sys.stdout = StringIO()
 sys.stderr = StringIO()
                 `);
-                
-                // Выполнение кода
                 await pyodide.runPythonAsync(code);
-                
-                // Получение вывода
                 const stdout = pyodide.runPython('sys.stdout.getvalue()');
                 const stderr = pyodide.runPython('sys.stderr.getvalue()');
-                
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
-                
+
                 if (stderr) {
                     displayOutput(`❌ Ошибка:\n${stderr}`, 'error');
                 } else {
                     displayOutput(`✓ Успешно выполнено\n\n${stdout || '(Нет вывода)'}`, 'success');
                 }
-                
                 updateExecutionTime(executionTime);
                 updateExecutionMode('Браузер', 'client');
-                
-                // Проверка результата
-                await checkTaskResult(code, stdout, analysis);
-                
+
+                if (checkResult) {
+                    await checkTaskResult(code, stdout, analysis);
+                }
             } catch (error) {
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
                 displayOutput(`❌ Ошибка выполнения:\n${error.message}`, 'error');
@@ -418,12 +380,11 @@ sys.stderr = StringIO()
                 updateExecutionMode('Ошибка', 'client');
             }
         }
-        
+
         // ==================== ВЫПОЛНЕНИЕ НА СЕРВЕРЕ ====================
-        async function executeOnServer(code, analysis) {
+        async function executeOnServer(code, analysis, checkResult) {
             updateExecutionMode('Сервер', 'server');
             displayOutput('🚀 Выполнение на сервере...\n', 'info');
-            
             try {
                 const response = await fetch('{% url "task_mananger:execute_code" %}', {
                     method: 'POST',
@@ -431,40 +392,32 @@ sys.stderr = StringIO()
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ 
-                        code: code,
-                        task_id: {{ task.id }}
-                    })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
                 });
-                
-                if (!response.ok) {
-                    throw new Error('Ошибка выполнения на сервере');
-                }
-                
+
+                if (!response.ok) throw new Error('Ошибка выполнения на сервере');
                 const result = await response.json();
-                
+
                 if (result.success) {
                     displayOutput(`✓ Успешно выполнено\n\n${result.output || '(Нет вывода)'}`, 'success');
                     updateExecutionTime(result.execution_time);
                     updateExecutionMode('Сервер', 'server');
-                    
-                    // Проверка результата
-                    await checkTaskResult(code, result.output, result.analysis);
+                    if (checkResult) {
+                        await checkTaskResult(code, result.output, result.analysis);
+                    }
                 } else {
                     displayOutput(`❌ Ошибка:\n${result.error}`, 'error');
                     updateExecutionTime(result.execution_time);
                     updateExecutionMode('Ошибка', 'server');
                 }
-                
             } catch (error) {
                 displayOutput(`❌ Ошибка сети: ${error.message}`, 'error');
                 updateExecutionMode('Ошибка', 'server');
             }
         }
-        
+
         // ==================== ПРОВЕРКА РЕЗУЛЬТАТА ЗАДАНИЯ ====================
         async function checkTaskResult(code, output, analysis) {
-            // Отправка на проверку правильности решения
             try {
                 const response = await fetch('{% url "task_mananger:check_task" %}', {
                     method: 'POST',
@@ -472,25 +425,16 @@ sys.stderr = StringIO()
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({
-                        task_id: {{ task.id }},
-                        code: code,
-                        output: output
-                    })
+                    body: JSON.stringify({ task_id: {{ task.id }}, code: code, output: output })
                 });
-                
                 const result = await response.json();
-                
                 if (result.correct) {
                     displayOutput(
                         `✓ Успешно выполнено\n\n${output}\n\n🎉 Задание решено правильно!`,
                         'success'
                     );
-                    // Показываем кнопку "Далее"
                     const nextBtn = document.getElementById('nextButton');
-                    if (nextBtn) {
-                        nextBtn.style.display = 'inline-block';
-                    }
+                    if (nextBtn) nextBtn.style.display = 'inline-block';
                 } else if (result.message) {
                     displayOutput(
                         `✓ Код выполнен\n\n${output}\n\n⚠ ${result.message}`,
@@ -501,18 +445,15 @@ sys.stderr = StringIO()
                 console.error('Ошибка проверки задания:', error);
             }
         }
-        
+
         // ==================== АНАЛИЗ КОДА ====================
         async function analyzeCode() {
             const code = editor.getValue().trim();
-            
             if (!code) {
                 displayOutput('⚠ Введите код для анализа', 'error');
                 return;
             }
-            
             displayOutput('🔍 Анализ кода...', 'info');
-            
             try {
                 const response = await fetch('{% url "task_mananger:analyze_code" %}', {
                     method: 'POST',
@@ -520,64 +461,55 @@ sys.stderr = StringIO()
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ 
-                        code: code,
-                        task_id: {{ task.id }}
-                    })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
                 });
-                
                 const analysis = await response.json();
-                
                 let output = '=== РЕЗУЛЬТАТ АНАЛИЗА ===\n\n';
                 output += `Режим выполнения: ${analysis.execution_mode === 'client' ? 'Браузер (Pyodide)' : 'Сервер (Docker)'}\n`;
                 output += `Причина: ${analysis.reason}\n`;
                 output += `Сложность кода: ${analysis.complexity_score}\n`;
                 output += `Можно выполнить в Pyodide: ${analysis.can_use_pyodide ? 'Да' : 'Нет'}\n\n`;
-                
                 if (analysis.issues && analysis.issues.length > 0) {
                     output += 'Обнаруженные особенности:\n';
-                    analysis.issues.forEach(issue => {
-                        output += `  • ${issue}\n`;
-                    });
+                    analysis.issues.forEach(issue => { output += `  • ${issue}\n`; });
                 }
-                
                 displayOutput(output, 'info');
-                
             } catch (error) {
                 displayOutput(`❌ Ошибка анализа: ${error.message}`, 'error');
             }
         }
-        
+
         // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
         function displayOutput(text, type) {
             const outputDiv = document.getElementById('output');
             outputDiv.textContent = text;
             outputDiv.className = `output-content ${type ? 'output-' + type : ''}`;
         }
-        
+
         function updateExecutionMode(text, type) {
             const modeDiv = document.getElementById('executionMode');
+            if (!modeDiv) return;
             modeDiv.textContent = text;
             modeDiv.className = `execution-mode mode-${type}`;
         }
-        
+
         function updateExecutionTime(time) {
             const timeDiv = document.getElementById('executionTime');
+            if (!timeDiv) return;
             timeDiv.textContent = time ? `⏱ ${time}s` : '';
         }
-        
+
         function resetCode() {
             if (confirm('Вы уверены, что хотите сбросить код?')) {
                 editor.setValue(initialCode);
                 displayOutput('Код сброшен к начальному состоянию', 'info');
             }
         }
-        
+
         function showHint() {
-            // Здесь можно добавить логику для показа подсказок
             displayOutput('💡 Подсказка: Проверьте логику условия в функции', 'info');
         }
-        
+
         function submitFeedback(type) {
             console.log(`Feedback: ${type}`);
             alert(`Спасибо за ваш отзыв! (${type === 'up' ? 'Понравилось' : 'Не понравилось'})`);
@@ -585,3 +517,4 @@ sys.stderr = StringIO()
     </script>
 </body>
 </html>
+

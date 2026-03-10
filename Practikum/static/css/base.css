@@ -9,6 +9,73 @@
     --navbar-height: 56px;
 }
 
+/* === Светлая тема === */
+.light-theme {
+    background-color: #f0f2f5;
+    color: #1f2121;
+}
+
+.light-theme body {
+    background-color: #f0f2f5;
+    color: #1f2121;
+}
+
+.light-theme .sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+}
+
+.light-theme .sidebar-link {
+    color: #444444;
+}
+
+.light-theme .sidebar-link:hover {
+    background-color: #f0f2f5;
+    color: #1f2121;
+}
+
+.light-theme .sidebar-item.active .sidebar-link {
+    background-color: #e8f0fe;
+    color: #409eff;
+}
+
+.light-theme .sidebar::-webkit-scrollbar-track { background: #f0f2f5; }
+.light-theme .sidebar::-webkit-scrollbar-thumb { background: #cccccc; }
+
+.light-theme .settings-section,
+.light-theme .task-item,
+.light-theme .stat-card,
+.light-theme .course-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #1f2121;
+}
+
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme .toggle-label {
+    color: #1f2121;
+}
+
+.light-theme .toggle-desc,
+.light-theme .sidebar-link {
+    color: #666666;
+}
+
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+    background-color: #ffffff;
+    color: #1f2121;
+    border: 1px solid #cccccc;
+}
+
+.light-theme .btn-secondary {
+    background-color: #e0e0e0;
+    color: #1f2121;
+}
+
 /* === Reset === */
 * {
     box-sizing: border-box;

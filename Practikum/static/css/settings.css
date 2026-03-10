@@ -22,7 +22,7 @@
 
 /* Секции настроек */
 .settings-section {
-    background: #fff;
+    background: #252525;
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     padding: 24px;
@@ -31,7 +31,7 @@
 .settings-section h2 {
     font-size: 20px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #white;
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid #f0f0f0;
@@ -50,7 +50,7 @@
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: #white;
     margin-bottom: 8px;
 }
 
@@ -116,13 +116,13 @@
 .toggle-label {
     font-size: 15px;
     font-weight: 500;
-    color: #1a1a1a;
+    color: #white;
     margin-bottom: 4px;
 }
 
 .toggle-desc {
     font-size: 13px;
-    color: #666;
+    color: #white;
 }
 
 /* Switch toggle */
@@ -208,6 +208,16 @@ input:checked + .slider:before {
     background: #f8f9fa;
     border-radius: 12px;
 }
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-danger:hover { background: #c82333; }
 
 /* Responsive */
 @media (max-width: 768px) {

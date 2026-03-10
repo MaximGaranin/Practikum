@@ -26,4 +26,12 @@
     {% include "includes/footer.html" %}
     
 </body>
+
+<script>
+    const theme = localStorage.getItem('theme') || 'dark';
+    if (theme === 'light') {
+        document.documentElement.classList.add('light-theme');
+    }
+</script>
+
 </html>
