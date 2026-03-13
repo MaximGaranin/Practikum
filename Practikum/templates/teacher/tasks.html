@@ -85,7 +85,7 @@
                 <div class="empty-state-icon">📖</div>
                 <h3>Темы не созданы</h3>
                 <p>Создайте первую тему для организации заданий</p>
-                <a href="/admin/Logistic_Task/topic/add/" class="btn btn-success">+ Создать первую тему</a>
+                <a href="{% url 'prac:teacher_topic_create' %}" class="btn btn-success">+ Создать первую тему</a>
             </div>
             {% endif %}
         </div>
@@ -144,32 +144,9 @@
                 <div class="empty-state-icon">📝</div>
                 <h3>Задания не созданы</h3>
                 <p>Создайте первое задание для студентов</p>
-                <a href="/admin/Logistic_Task/task/add/" class="btn btn-success">+ Создать первое задание</a>
+                <a href="{% url 'prac:teacher_task_create' %}" class="btn btn-success">+ Создать первое задание</a>
             </div>
             {% endif %}
-        </div>
-    </div>
-
-    <!-- Быстрое создание -->
-    <div class="section">
-        <div class="section-header">
-            <h2>⚡ Быстрые действия</h2>
-        </div>
-        <div class="section-content">
-            <div class="quick-actions">
-                <a href="{% url 'prac:teacher_task_create' %}" class="quick-action-card">
-                    <div class="quick-action-icon">📝</div>
-                    <div class="quick-action-title">Создать задание</div>
-                    <div class="quick-action-desc">Добавить новое задание для студентов</div>
-                </a>
-                
-                <a href="{% url 'prac:teacher_topic_create' %}" class="quick-action-card">
-                    <div class="quick-action-icon">📖</div>
-                    <div class="quick-action-title">Создать тему</div>
-                    <div class="quick-action-desc">Организовать задания по темам</div>
-                </a>
-                
-            </div>
         </div>
     </div>
 </div>

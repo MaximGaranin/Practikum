@@ -1,5 +1,6 @@
 {% load static %}
 {% block link %}<link rel="stylesheet" href="{% static 'css/teacher.css' %}">{% endblock %}
+
 {% block content %}
 <div class="teacher-header">
     <div class="container">
@@ -9,31 +10,71 @@
             <a href="{% url 'prac:teacher_students' %}">Студенты</a>
             <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
             <a href="{% url 'prac:teacher_tasks' %}" class="active">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
             <a href="{% url 'prac:profile' %}">Профиль</a>
         </nav>
     </div>
 </div>
+
 <div class="container">
     <a href="{% url 'prac:teacher_tasks' %}" class="btn btn-primary" style="margin-bottom:20px;">← Назад</a>
     <div class="section">
         <div class="section-header"><h2>{{ action }} задание</h2></div>
         <div class="section-content">
-            <form method="POST" style="max-width:600px;">
+            <form method="POST" style="max-width:700px;">
                 {% csrf_token %}
+
+                <!-- Название -->
                 <div style="margin-bottom:20px;">
-                    <label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Название задания</label>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">
+                        Название <span style="color:red;">*</span>
+                    </label>
                     <input type="text" name="name" value="{{ task.name|default:'' }}"
-                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:4px;font-size:14px;background:var(--bg-color);color:var(--text-color);box-sizing:border-box;" required>
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);
+                               border-radius:4px;font-size:14px;background:var(--bg-color);
+                               color:var(--text-color);box-sizing:border-box;" required>
                 </div>
+
+                <!-- Описание задания -->
                 <div style="margin-bottom:20px;">
-                    <label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Описание задания</label>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">Описание задания</label>
                     <textarea name="text_task" rows="6"
-                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:4px;font-size:14px;background:var(--bg-color);color:var(--text-color);box-sizing:border-box;resize:vertical;">{{ task.text_task|default:'' }}</textarea>
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);
+                               border-radius:4px;font-size:14px;background:var(--bg-color);
+                               color:var(--text-color);box-sizing:border-box;resize:vertical;">{{ task.text_task|default:'' }}</textarea>
                 </div>
+
+                <!-- Начальный код -->
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">
+                        Начальный код <small style="color:var(--text-muted);font-weight:400;">(стартовый код в редакторе)</small>
+                    </label>
+                    <textarea name="initial_code" rows="6"
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);
+                               border-radius:4px;font-size:14px;font-family:monospace;
+                               background:var(--bg-color);color:var(--text-color);
+                               box-sizing:border-box;resize:vertical;">{{ task.initial_code|default:'' }}</textarea>
+                </div>
+
+                <!-- Ожидаемый вывод -->
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">
+                        Ожидаемый вывод <small style="color:var(--text-muted);font-weight:400;">(для автопроверки)</small>
+                    </label>
+                    <textarea name="expected_output" rows="4"
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);
+                               border-radius:4px;font-size:14px;font-family:monospace;
+                               background:var(--bg-color);color:var(--text-color);
+                               box-sizing:border-box;resize:vertical;">{{ task.expected_output|default:'' }}</textarea>
+                </div>
+
+                <!-- Тема (только при создании) -->
                 {% if not task %}
                 <div style="margin-bottom:20px;">
-                    <label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Тема (необязательно)</label>
-                    <select name="topic_id" style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:4px;font-size:14px;background:var(--bg-color);color:var(--text-color);">
+                    <label style="display:block;font-weight:600;margin-bottom:6px;">Тема (необязательно)</label>
+                    <select name="topic_id"
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);
+                               border-radius:4px;font-size:14px;background:var(--bg-color);color:var(--text-color);">
                         <option value="">— Без темы —</option>
                         {% for topic in topics %}
                         <option value="{{ topic.id }}">{{ topic.name }}</option>
@@ -41,9 +82,12 @@
                     </select>
                 </div>
                 {% endif %}
+
                 <button type="submit" class="btn btn-success">💾 {{ action }}</button>
+                <a href="{% url 'prac:teacher_tasks' %}" class="btn btn-primary" style="margin-left:10px;">Отмена</a>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
+

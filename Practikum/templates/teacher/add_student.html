@@ -1,0 +1,50 @@
+{% load static %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'css/teacher.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>➕ Добавить студента</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}" class="active">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
+            <a href="{% url 'prac:profile' %}">Профиль</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section">
+        <div class="section-header">
+            <h2>Новый студент</h2>
+            <a href="{% url 'prac:teacher_students' %}" class="btn btn-primary btn-sm">← Назад</a>
+        </div>
+        <div class="section-content">
+            <form method="post" style="max-width: 500px;">
+                {% csrf_token %}
+                {% for field in form %}
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:600;">
+                        {{ field.label }}{% if field.field.required %} <span style="color:red;">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p style="color: red; margin-top: 4px; font-size: 0.9em;">{{ field.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div style="margin-top: 24px;">
+                    <button type="submit" class="btn btn-success">✅ Создать студента</button>
+                    <a href="{% url 'prac:teacher_students' %}" class="btn btn-primary" style="margin-left: 10px;">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

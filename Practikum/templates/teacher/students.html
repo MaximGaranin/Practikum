@@ -22,8 +22,18 @@
 <div class="container">
     <!-- Поиск -->
     <div class="search-box">
-        <form method="get">
-            <input type="text" name="search" placeholder="Поиск студентов..." value="{{ search_query }}">
+        <form method="get" style="display: flex; gap: 8px; align-items: center;">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Поиск студентов..." 
+                value="{{ search_query }}"
+                style="flex: 1;"
+            >
+            <button type="submit" class="btn btn-primary">🔍 Найти</button>
+            {% if search_query %}
+            <a href="{% url 'prac:teacher_students' %}" class="btn btn-primary">✕ Сбросить</a>
+            {% endif %}
         </form>
     </div>
 
@@ -31,7 +41,7 @@
     <div class="section">
         <div class="section-header">
             <h2>Список студентов ({{ students.paginator.count }})</h2>
-            <a href="/admin/practikum/student/add/" class="btn btn-success btn-sm">+ Добавить студента</a>
+            <a href="{% url 'prac:teacher_add_student' %}" class="btn btn-success btn-sm">+ Добавить студента</a>
         </div>
         <div class="section-content">
             {% if students %}

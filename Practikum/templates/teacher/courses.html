@@ -57,72 +57,12 @@
         </div>
     </div>
 
-    <!-- Список курсов -->
-    <div class="section">
-        <div class="section-header">
-            <h2>Все курсы</h2>
-            <a href="{% url 'prac:teacher_course_create' %}" class="btn btn-success btn-sm">+ Создать курс</a>
-        </div>
-        <div class="section-content">
-            {% if courses %}
-            <div class="courses-grid">
-                {% for course in courses %}
-                <div class="course-card">
-                    <div class="course-card-header">
-                        <h3>{{ course.name }}</h3>
-                    </div>
-                    <div class="course-card-body">
-                        <div class="course-stats">
-                            <div class="course-stat-item">
-                                <span class="course-stat-icon">📖</span>
-                                <div>
-                                    <div class="course-stat-value">{{ course.topics_count }}</div>
-                                    <div class="course-stat-label">Тем</div>
-                                </div>
-                            </div>
-                            
-                            <div class="course-stat-item">
-                                <span class="course-stat-icon">👥</span>
-                                <div>
-                                    <div class="course-stat-value">{{ course.students_count }}</div>
-                                    <div class="course-stat-label">Студентов</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {% if course.students_count > 0 %}
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-label">Наполненность</div>
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill" style="width: {{ course.students_count|add:0|floatformat:0 }}%"></div>
-                            </div>
-                            <div class="progress-bar-text">{{ course.students_count }} студентов</div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="course-card-footer">
-                        <a href="{% url 'prac:teacher_course_edit' course.id %}" class="btn btn-primary btn-sm">Редактировать</a>
-                        <a href="{% url 'prac:teacher_course_delete' course.id %}" class="btn btn-danger btn-sm">Удалить</a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📚</div>
-                <h3>Курсы не созданы</h3>
-                <p>Создайте первый курс для начала работы</p>
-                <a href="/admin/Logistic_Task/course/add/" class="btn btn-success">+ Создать первый курс</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
     <!-- Таблица с подробной информацией -->
     {% if courses %}
     <div class="section">
         <div class="section-header">
             <h2>Детальная информация</h2>
+            <a href="{% url 'prac:teacher_course_create' %}" class="btn btn-success btn-sm">+ Создать курс</a>
         </div>
         <div class="section-content">
             <div class="table-responsive">
@@ -151,9 +91,13 @@
                                     <span class="badge badge-warning">Без студентов</span>
                                 {% endif %}
                             </td>
+                           
                             <td>
-                                <a href="/admin/Logistic_Task/course/{{ course.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
-                                <a href="/admin/Logistic_Task/course/{{ course.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
+                                <a href="{% url 'prac:teacher_course_edit' course.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    onclick="confirmDelete('{% url 'prac:teacher_course_delete' course.id %}', '{{ course.name }}')">
+                                        Удалить
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}

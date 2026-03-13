@@ -22,6 +22,7 @@ from django.db import models as django_models_db
 from .checker import check_submission
 from django.utils.timezone import now as tz_now
 from .currency import reward_for_task, reward_for_achievement, reward_for_contest, get_or_create_wallet
+from .forms import AddStudentForm
 
 User = get_user_model()
 
@@ -788,16 +789,23 @@ def teacher_task_create(request):
 
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        text_task = request.POST.get('text_task', '').strip()
-        topic_id = request.POST.get('topic_id')
         if name:
-            task_obj = Task.objects.create(name=name, text_task=text_task or None)
+            task_obj = Task.objects.create(
+                name=name,
+                text_task=request.POST.get('text_task', '').strip() or None,
+                initial_code=request.POST.get('initial_code', '').strip() or None,
+                expected_output=request.POST.get('expected_output', '').strip() or None,
+            )
+            topic_id = request.POST.get('topic_id')
             if topic_id:
                 topic = Topic.objects.get(id=topic_id)
                 topic.tasks.add(task_obj)
             return redirect('prac:teacher_tasks')
+
     return render(request, 'teacher/task_form.html', {
-        'action': 'Создать', 'task': None, 'topics': topics
+        'action': 'Создать',
+        'task': None,
+        'topics': topics,
     })
 
 
@@ -811,15 +819,20 @@ def teacher_task_edit(request, task_id):
     topics = Topic.objects.filter(course__id__in=teacher_courses_ids).distinct()
 
     if request.method == 'POST':
-        task_obj.name = request.POST.get('name', task_obj.name).strip()
-        task_obj.text_task = request.POST.get('text_task', '').strip() or None
-        task_obj.save()
-        return redirect('prac:teacher_tasks')
+        name = request.POST.get('name', '').strip()
+        if name:
+            task_obj.name = name
+            task_obj.text_task = request.POST.get('text_task', '').strip() or None
+            task_obj.initial_code = request.POST.get('initial_code', '').strip() or None
+            task_obj.expected_output = request.POST.get('expected_output', '').strip() or None
+            task_obj.save()
+            return redirect('prac:teacher_tasks')
+
     return render(request, 'teacher/task_form.html', {
-        'action': 'Сохранить', 'task': task_obj, 'topics': topics
+        'action': 'Сохранить',
+        'task': task_obj,
+        'topics': topics,
     })
-
-
 @teacher_required
 def teacher_task_delete(request, task_id):
     task_obj = get_object_or_404(Task, id=task_id)
@@ -882,4 +895,83 @@ def teacher_topic_delete(request, topic_id):
     return render(request, 'teacher/confirm_delete.html', {
         'object_name': topic.name,
         'cancel_url': 'prac:teacher_tasks',
+    })
+
+
+@teacher_required
+def teacher_add_student(request):
+    teacher = request.user.teacher
+    teacher_groups = Group.objects.filter(
+        id__in=CourseTeacherGroup.objects.filter(
+            teacher=teacher
+        ).values_list('group', flat=True)
+    )
+
+    form = AddStudentForm(
+    request.POST or None,
+    group_queryset=teacher_groups
+    )
+
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        user = User.objects.create_user(
+            username=data['username'],
+            email=data.get('email', ''),
+            password=data['password'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+        )
+        student = Student.objects.create(
+            user=user,
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            phone_number=data.get('phone_number') or None,
+        )
+        group_obj = Group.objects.get(id=data['group'])
+        Enrollment.objects.create(student=student, group=group_obj)
+        return redirect('prac:teacher_students')
+
+    return render(request, 'teacher/add_student.html', {
+        'form': form, 'teacher': teacher,
+    })
+
+
+@teacher_required
+def teacher_course_create(request):
+    from Logistic_Task.models import Topic
+    topics = Topic.objects.all().order_by('name')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        selected_topics = request.POST.getlist('topics')
+        if name:
+            course = Course.objects.create(name=name)
+            if selected_topics:
+                course.topics.set(selected_topics)
+            return redirect('prac:teacher_courses')
+    
+    return render(request, 'teacher/course_form.html', {
+        'action': 'Создать', 'course': None, 'all_topics': topics, 'selected_topic_ids': []
+    })
+
+
+@teacher_required
+def teacher_course_edit(request, course_id):
+    from Logistic_Task.models import Topic
+    course = get_object_or_404(Course, id=course_id)
+    topics = Topic.objects.all().order_by('name')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        selected_topics = request.POST.getlist('topics')
+        if name:
+            course.name = name
+            course.save()
+            course.topics.set(selected_topics)
+            return redirect('prac:teacher_courses')
+    
+    selected_topic_ids = list(course.topics.values_list('id', flat=True))
+    return render(request, 'teacher/course_form.html', {
+        'action': 'Сохранить', 'course': course,
+        'all_topics': topics, 'selected_topic_ids': selected_topic_ids
     })
