@@ -16,8 +16,8 @@
 }
 
 .light-theme body {
-    background-color: #f0f2f5;
-    color: #1f2121;
+    background-color: #f0f2f5 !important;
+    color: #1f2121 !important;
 }
 
 .light-theme .sidebar {
@@ -118,4 +118,40 @@ body {
     max-width: 1280px;
     margin: 0 auto;
     padding: 32px 20px;
+}
+
+/* === Светлая тема — переопределение переменных === */
+.light-theme {
+    --color-bg-dark: #ffffff;
+    --color-bg-darker: #f8f8f8;
+    --color-gray-200: #1f2121;
+    --color-gray-300: #444444;
+    --color-gray-400: #666666;
+    --color-white: #1f2121;
+    --color-black: #ffffff;
+}
+
+.light-theme .site-header {
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.light-theme .mobile-nav {
+    background-color: #f8f8f8;
+}
+
+.light-theme .header-brand,
+.light-theme .text-link,
+.light-theme .dropdown-btn,
+.light-theme .mobile-nav-item {
+    color: #1f2121;
+}
+
+.light-theme .dropdown-btn {
+    border-color: #cccccc;
+}
+
+.light-theme .dropdown-btn:hover {
+    background: #e8e8e8;
 }

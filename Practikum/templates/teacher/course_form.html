@@ -1,0 +1,33 @@
+{% load static %}
+{% block link %}<link rel="stylesheet" href="{% static 'css/teacher.css' %}">{% endblock %}
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>📚 {{ action }} курс</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}" class="active">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:profile' %}">Профиль</a>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <a href="{% url 'prac:teacher_courses' %}" class="btn btn-primary" style="margin-bottom:20px;">← Назад</a>
+    <div class="section">
+        <div class="section-header"><h2>{{ action }} курс</h2></div>
+        <div class="section-content">
+            <form method="POST" style="max-width:500px;">
+                {% csrf_token %}
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Название курса</label>
+                    <input type="text" name="name" value="{{ course.name|default:'' }}"
+                        style="width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:4px;font-size:14px;background:var(--bg-color);color:var(--text-color);box-sizing:border-box;" required>
+                </div>
+                <button type="submit" class="btn btn-success">💾 {{ action }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

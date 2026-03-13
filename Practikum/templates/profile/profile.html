@@ -2,155 +2,376 @@
 <link rel="stylesheet" href='{% static "css/profile.css" %}' />
 {% endblock %} {% block content %}
 <div class="profile-container">
-	<div class="profile-box">
-		<!-- Шапка профиля -->
-		<div class="profile-header">
-			<div class="avatar">
-				<svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-					<circle cx="50" cy="50" r="50" fill="#409eff" />
-					<text
-						x="50"
-						y="50"
-						text-anchor="middle"
-						dy=".3em"
-						fill="white"
-						font-size="40"
-						font-weight="bold"
-					>
-						{{ profile.username.0|upper }}
-					</text>
-				</svg>
-			</div>
-			<h2 class="username">{{ profile.username }}</h2>
+    <div class="profile-box">
 
-			{% if user.is_authenticated and user == profile %}
-			<div class="header-buttons">
-				<button id="editToggleBtn" class="edit-btn">
-					Редактировать профиль
-				</button>
-				<form method="post" action="{% url 'logout' %}" style="display: inline">
-					{% csrf_token %}
-					<button type="submit" class="logout-btn">Выйти</button>
-				</form>
-			</div>
-			{% endif %}
-		</div>
+        <!-- Шапка профиля -->
+        <div class="profile-header">
+            <div class="avatar">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                    <circle cx="50" cy="50" r="50" fill="#409eff" />
+                    <text x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-size="40" font-weight="bold">
+                        {{ profile.username.0|upper }}
+                    </text>
+                </svg>
+            </div>
+            <h2 class="username">{{ profile.username }}</h2>
+            {% if user.is_authenticated and user == profile %}
+            <div class="header-buttons">
+                <button id="editToggleBtn" class="edit-btn">Редактировать профиль</button>
+                <form method="post" action="{% url 'logout' %}" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
 
-		<!-- Информация о пользователе (режим просмотра) -->
-		<div class="info-section" id="viewMode">
-			<h3 class="section-title">Информация</h3>
-			<div class="profile-info">
-				<div class="info-group">
-					<label>Имя:</label>
-					<span>{{ profile.first_name|default:"Не указано" }}</span>
-				</div>
+        <!-- Информация (просмотр) -->
+        <div class="info-section" id="viewMode">
+            <h3 class="section-title">Информация</h3>
+            <div class="profile-info">
+                <div class="info-group"><label>Имя:</label><span>{{ profile.first_name|default:"Не указано" }}</span></div>
+                <div class="info-group"><label>Фамилия:</label><span>{{ profile.last_name|default:"Не указано" }}</span></div>
+                <div class="info-group"><label>Группа:</label><span>{{ group.name|default:"Не указано" }}</span></div>
+                <div class="info-group"><label>Телефон:</label><span>{{ student.phone_number|default:"Не указан" }}</span></div>
+                <div class="info-group"><label>Email:</label><span>{{ profile.email|default:"Не указан" }}</span></div>
+                <div class="info-group"><label>Дата регистрации:</label><span>{{ profile.date_joined|date:"d.m.Y" }}</span></div>
+                <div class="info-group"><label>Последний вход:</label><span>{{ profile.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</span></div>
+            </div>
+        </div>
 
-				<div class="info-group">
-					<label>Фамилия:</label>
-					<span>{{ profile.last_name|default:"Не указано" }}</span>
-				</div>
+        <!-- Режим редактирования -->
+        {% if user.is_authenticated and user == profile %}
+        <div class="edit-section" id="editMode" style="display:none">
+            <h3 class="section-title">Редактирование данных</h3>
+            <form method="post" class="edit-form">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="error-messages">
+                    {% for field, errors in form.errors.items %}{% for error in errors %}
+                    <p class="error-text">{{ error }}</p>
+                    {% endfor %}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="id_first_name">Имя:</label>
+                    <input type="text" id="id_first_name" name="first_name" value="{{ profile.first_name }}" maxlength="150" placeholder="Введите имя"/>
+                </div>
+                <div class="form-group">
+                    <label for="id_last_name">Фамилия:</label>
+                    <input type="text" id="id_last_name" name="last_name" value="{{ profile.last_name }}" maxlength="150" placeholder="Введите фамилию"/>
+                </div>
+                <div class="form-group">
+                    <label for="id_phone_number">Телефон:</label>
+                    <input type="text" id="id_phone_number" name="phone_number" value="{{ phone_number }}" maxlength="20" placeholder="+7 999 123-45-67"/>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email:</label>
+                    <input type="email" id="id_email" name="email" value="{{ profile.email }}" required placeholder="Введите email"/>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">Сохранить изменения</button>
+                    <button type="button" id="cancelBtn" class="cancel-btn">Отмена</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
 
-				<div class="info-group">
-					<label>Группа:</label>
-					<span>{{ group.name|default:"Не указано" }}</span>
-				</div>
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Статистика</h3>
 
-				<div class="info-group">
-					<label>Телефон:</label>
-					<span>{{ student.phone_number|default:"Не указан" }}</span>
-				</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+                <div style="background:rgba(64,158,255,0.08);border:1px solid rgba(64,158,255,0.2);border-radius:10px;padding:16px;text-align:center;">
+                    <div style="font-size:28px;font-weight:700;color:#409eff;">{{ total_solved }}</div>
+                    <div style="font-size:12px;color:#888;margin-top:4px;">Решено задач</div>
+                </div>
+                <div style="background:rgba(50,184,198,0.08);border:1px solid rgba(50,184,198,0.2);border-radius:10px;padding:16px;text-align:center;">
+                    <div style="font-size:28px;font-weight:700;color:#32B8C6;">{{ total_attempts }}</div>
+                    <div style="font-size:12px;color:#888;margin-top:4px;">Всего попыток</div>
+                </div>
+                <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:16px;text-align:center;">
+                    <div style="font-size:28px;font-weight:700;color:#ffd700;">{{ courses_count }}</div>
+                    <div style="font-size:12px;color:#888;margin-top:4px;">Курсов</div>
+                </div>
+                <div style="background:rgba(255,118,117,0.08);border:1px solid rgba(255,118,117,0.2);border-radius:10px;padding:16px;text-align:center;">
+                    <div style="font-size:28px;font-weight:700;color:#ff7675;">{{ streak }}</div>
+                    <div style="font-size:12px;color:#888;margin-top:4px;">Дней подряд 🔥</div>
+                </div>
+            </div>
 
-				<div class="info-group">
-					<label>Email:</label>
-					<span>{{ profile.email|default:"Не указан" }}</span>
-				</div>
+            <!-- Тепловая карта -->
+            <div style="margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-size:14px;color:#aaa;" id="heatmap-total-label">Активность за последний год</span>
+                </div>
+                <div style="width:100%;overflow-x:auto;">
+                    <svg id="heatmap-svg" style="display:block;"></svg>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:#666;">
+                    <span>Меньше</span>
+                    <svg width="11" height="11"><rect width="11" height="11" rx="2" fill="#1e1e1e" stroke="#333" stroke-width="1"/></svg>
+                    <svg width="11" height="11"><rect width="11" height="11" rx="2" fill="#0e4429"/></svg>
+                    <svg width="11" height="11"><rect width="11" height="11" rx="2" fill="#196c2e"/></svg>
+                    <svg width="11" height="11"><rect width="11" height="11" rx="2" fill="#2ea043"/></svg>
+                    <svg width="11" height="11"><rect width="11" height="11" rx="2" fill="#56d364"/></svg>
+                    <span>Больше</span>
+                </div>
+            </div>
+        </div>
 
-				<div class="info-group">
-					<label>Дата регистрации:</label>
-					<span>{{ profile.date_joined|date:"d.m.Y" }}</span>
-				</div>
+        <!-- ===== ДОСТИЖЕНИЯ ===== -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Достижения</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                {% for ach in achievements %}
+                <div style="display:flex;align-items:center;gap:10px;
+                    background:{% if ach.unlocked %}rgba(86,211,100,0.08){% else %}rgba(255,255,255,0.03){% endif %};
+                    border:1px solid {% if ach.unlocked %}rgba(86,211,100,0.3){% else %}#2a2a2a{% endif %};
+                    border-radius:10px;padding:12px 16px;min-width:200px;
+                    opacity:{% if ach.unlocked %}1{% else %}0.45{% endif %};">
+                    <span style="font-size:28px;">{{ ach.icon }}</span>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:{% if ach.unlocked %}#56d364{% else %}#888{% endif %};">
+                            {{ ach.name }}
+                        </div>
+                        <div style="font-size:11px;color:#666;margin-top:2px;">{{ ach.description }}</div>
+                    </div>
+                    {% if ach.unlocked %}
+                    <span style="margin-left:auto;font-size:16px;">✅</span>
+                    {% else %}
+                    <span style="margin-left:auto;font-size:16px;">🔒</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p style="color:#666;font-size:13px;">Достижений пока нет.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- ===== КОШЕЛЁК ===== -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">🪙 История монет</h3>
+            {% if transactions %}
+            {% for tx in transactions %}
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
+                border-radius:8px;padding:10px 16px;margin-bottom:6px;">
+                <div>
+                    <span style="font-size:13px;color:#e0e0e0;">{{ tx.description }}</span>
+                    <span style="font-size:11px;color:#555;margin-left:10px;">
+                        {{ tx.created_at|date:"d.m.Y H:i" }}
+                    </span>
+                </div>
+                <span style="font-size:15px;font-weight:700;color:#ffd700;">
+                    +{{ tx.amount }} 🪙
+                </span>
+            </div>
+            {% endfor %}
+            {% else %}
+             <p style="color:#666;font-size:13px;">Монет пока нет.</p>
+            {% endif %}
+        </div>
+        <!-- ===== СОРЕВНОВАНИЯ ===== -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Соревнования</h3>
 
-				<div class="info-group">
-					<label>Последний вход:</label>
-					<span
-						>{{ profile.last_login|date:"d.m.Y H:i"|default:"Никогда" }}</span
-					>
-				</div>
-			</div>
-		</div>
+            {% if active_contests %}
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12px;color:#56d364;font-weight:600;margin-bottom:8px;">🟢 АКТИВНЫЕ</div>
+                {% for c in active_contests %}
+                <div style="display:flex;justify-content:space-between;align-items:center;
+                    background:rgba(86,211,100,0.05);border:1px solid rgba(86,211,100,0.2);
+                    border-radius:10px;padding:14px 16px;margin-bottom:8px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:600;color:#e0e0e0;">{{ c.title }}</div>
+                        <div style="font-size:11px;color:#666;margin-top:3px;">
+                            До {{ c.end_time|date:"d.m.Y H:i" }} · {{ c.tasks.count }} задач
+                        </div>
+                    </div>
+                    <a href="{% url 'prac:contest_detail' c.id %}"
+                       style="background:#56d364;color:#000;font-size:12px;font-weight:700;
+                              padding:6px 14px;border-radius:6px;text-decoration:none;">
+                        Участвовать
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-		<!-- Режим редактирования -->
-		{% if user.is_authenticated and user == profile %}
-		<div class="edit-section" id="editMode" style="display: none">
-			<h3 class="section-title">Редактирование данных</h3>
-			<form method="post" class="edit-form">
-				{% csrf_token %} {% if form.errors %}
-				<div class="error-messages">
-					{% for field, errors in form.errors.items %} {% for error in errors %}
-					<p class="error-text">{{ error }}</p>
-					{% endfor %} {% endfor %}
-				</div>
-				{% endif %}
+            {% if past_contests_with_rank %}
+            <div>
+                <div style="font-size:12px;color:#888;font-weight:600;margin-bottom:8px;">⏳ ПРОШЕДШИЕ</div>
+                {% for item in past_contests_with_rank %}
+                <div style="display:flex;justify-content:space-between;align-items:center;
+                    background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
+                    border-radius:10px;padding:14px 16px;margin-bottom:8px;">
+                    <div>
+                        <div style="font-size:14px;color:#aaa;">{{ item.contest.title }}</div>
+                        <div style="font-size:11px;color:#555;margin-top:3px;">
+                            {{ item.contest.end_time|date:"d.m.Y" }} · {{ item.contest.tasks.count }} задач
+                        </div>
+                    </div>
+                    {% if item.rank %}
+                    <span style="font-size:20px;font-weight:700;color:
+                        {% if item.rank == 1 %}#ffd700
+                        {% elif item.rank == 2 %}#c0c0c0
+                        {% elif item.rank == 3 %}#cd7f32
+                        {% else %}#666{% endif %};">
+                        #{{ item.rank }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-				<div class="form-group">
-					<label for="id_first_name">Имя:</label>
-					<input
-						type="text"
-						id="id_first_name"
-						name="first_name"
-						value="{{ profile.first_name }}"
-						maxlength="150"
-						placeholder="Введите имя"
-					/>
-				</div>
+            {% if not active_contests and not past_contests_with_rank %}
+            <p style="color:#666;font-size:13px;">Нет соревнований.</p>
+            {% endif %}
+        </div>
 
-				<div class="form-group">
-					<label for="id_last_name">Фамилия:</label>
-					<input
-						type="text"
-						id="id_last_name"
-						name="last_name"
-						value="{{ profile.last_name }}"
-						maxlength="150"
-						placeholder="Введите фамилию"
-					/>
-				</div>
+        <!-- ===== КОД-РЕВЬЮ ===== -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Код-ревью</h3>
+            {% if reviews %}
+            {% for r in reviews %}
+            <div style="background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
+                border-radius:10px;padding:16px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:13px;font-weight:600;color:#e0e0e0;">
+                        📝 {{ r.submission.task.title }}
+                    </span>
+                    <span style="font-size:11px;padding:3px 8px;border-radius:4px;
+                        background:{% if r.status == 'approved' %}rgba(86,211,100,0.15){% elif r.status == 'rejected' %}rgba(255,100,100,0.15){% else %}rgba(255,200,0,0.15){% endif %};
+                        color:{% if r.status == 'approved' %}#56d364{% elif r.status == 'rejected' %}#ff6464{% else %}#ffd700{% endif %};">
+                        {% if r.status == 'approved' %}✅ Одобрено
+                        {% elif r.status == 'rejected' %}❌ Отклонено
+                        {% else %}⏳ На проверке{% endif %}
+                    </span>
+                </div>
+                <pre style="background:#0d1117;border-radius:6px;padding:12px;font-size:12px;
+                    color:#c9d1d9;overflow-x:auto;margin:0 0 10px 0;max-height:150px;">{{ r.submission.code }}</pre>
+                {% if r.comment %}
+                <div style="background:rgba(64,158,255,0.06);border-left:3px solid #409eff;
+                    padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#aaa;">
+                    💬 <strong style="color:#409eff;">{{ r.reviewer.username }}:</strong> {{ r.comment }}
+                </div>
+                {% endif %}
+                <div style="font-size:11px;color:#555;margin-top:8px;">
+                    {{ r.created_at|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:#666;font-size:13px;">Ревью ещё не запрашивались.</p>
+            {% endif %}
+        </div>
 
-				<div class="form-group">
-					<label for="id_phone_number">Телефон:</label>
-					<input
-						type="text"
-						id="id_phone_number"
-						name="phone_number"
-						value="{{ phone_number }}"
-						maxlength="20"
-						placeholder="+7 999 123-45-67"
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="id_email">Email:</label>
-					<input
-						type="email"
-						id="id_email"
-						name="email"
-						value="{{ profile.email }}"
-						required
-						placeholder="Введите email"
-					/>
-				</div>
-
-				<div class="form-actions">
-					<button type="submit" class="save-btn">Сохранить изменения</button>
-					<button type="button" id="cancelBtn" class="cancel-btn">
-						Отмена
-					</button>
-				</div>
-			</form>
-		</div>
-		{% endif %}
-	</div>
+    </div>
 </div>
 
 <script src='{% static "js/profile.js" %}'></script>
+
+<script>
+(function() {
+    const activityMap = {{ activity_map|safe }};
+    const colors = ['#161b22', '#0e4429', '#196c2e', '#2ea043', '#56d364'];
+    const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const start = new Date(today);
+    start.setDate(start.getDate() - 364);
+    const startDay = start.getDay();
+    const offset = (startDay === 0) ? 6 : startDay - 1;
+    start.setDate(start.getDate() - offset);
+
+    const weeks = [];
+    const cursor = new Date(start);
+    while (cursor <= today) {
+        const week = [];
+        for (let d = 0; d < 7; d++) {
+            if (cursor <= today) {
+                const key = cursor.toISOString().slice(0, 10);
+                week.push({ date: key, count: activityMap[key] || 0 });
+            } else {
+                week.push(null);
+            }
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        weeks.push(week);
+    }
+
+    const CELL = 16;
+    const GAP  = 4;
+    const LABEL_W = 30;
+    const LABEL_H = 20;
+    const cols = weeks.length;
+    const svgW = LABEL_W + cols * (CELL + GAP);
+    const svgH = LABEL_H + 7 * (CELL + GAP);
+
+    const svg = document.getElementById('heatmap-svg');
+    svg.setAttribute('width', svgW);
+    svg.setAttribute('height', svgH);
+
+    const ns = 'http://www.w3.org/2000/svg';
+
+    days.forEach((label, i) => {
+        const t = document.createElementNS(ns, 'text');
+        t.setAttribute('x', 0);
+        t.setAttribute('y', LABEL_H + i * (CELL + GAP) + CELL);
+        t.setAttribute('font-size', '12');
+        t.setAttribute('fill', '#666');
+        t.textContent = label;
+        svg.appendChild(t);
+    });
+
+    let lastMonth = -1;
+    weeks.forEach((week, wi) => {
+        const firstDay = week.find(d => d !== null);
+        if (!firstDay) return;
+        const m = new Date(firstDay.date).getMonth();
+        if (m !== lastMonth) {
+            const t = document.createElementNS(ns, 'text');
+            t.setAttribute('x', LABEL_W + wi * (CELL + GAP));
+            t.setAttribute('y', LABEL_H - 4);
+            t.setAttribute('font-size', '12');
+            t.setAttribute('fill', '#666');
+            t.textContent = months[m];
+            svg.appendChild(t);
+            lastMonth = m;
+        }
+    });
+
+    let total = 0;
+    weeks.forEach((week, wi) => {
+        week.forEach((day, di) => {
+            if (!day) return;
+            total += day.count;
+            const level = day.count === 0 ? 0 : day.count === 1 ? 1 : day.count === 2 ? 2 : day.count <= 4 ? 3 : 4;
+            const rect = document.createElementNS(ns, 'rect');
+            rect.setAttribute('x', LABEL_W + wi * (CELL + GAP));
+            rect.setAttribute('y', LABEL_H + di * (CELL + GAP));
+            rect.setAttribute('width', CELL);
+            rect.setAttribute('height', CELL);
+            rect.setAttribute('rx', 2);
+            rect.setAttribute('fill', colors[level]);
+            if (day.count === 0) rect.setAttribute('stroke', '#30363d');
+            rect.setAttribute('stroke-width', '0.5');
+            const title = document.createElementNS(ns, 'title');
+            title.textContent = `${day.date}: ${day.count} решений`;
+            rect.appendChild(title);
+            svg.appendChild(rect);
+        });
+    });
+
+    document.getElementById('heatmap-total-label').textContent =
+        `${total} решений за последний год`;
+})();
+</script>
+
 {% endblock %}
+

@@ -1,87 +1,230 @@
+{% load static %}
 <header class="site-header">
-	<div class="header-container">
-		<!-- Левая часть: Логотип -->
-		<div class="header-left">
-			<a href="/" class="header-brand">
-				<div class="brand-logo">
-					<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-						<circle cx="16" cy="16" r="16" fill="#FF5630" />
-						<path d="M16 8L20 16L16 24L12 16L16 8Z" fill="white" />
-					</svg>
-				</div>
-				<span class="brand-text">Практикум</span>
-			</a>
-		</div>
+    <div class="header-container">
+        <!-- Левая часть: Логотип -->
+        <div class="header-left">
+            <a href="/" class="header-brand">
+                <div class="brand-logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#FF5630" />
+                        <path d="M16 8L20 16L16 24L12 16L16 8Z" fill="white" />
+                    </svg>
+                </div>
+                <span class="brand-text">Практикум</span>
+            </a>
+        </div>
 
-		<!-- Правая часть: Меню и аватар -->
-		<div class="header-right">
-			<button class="dropdown-btn">
-				<span>Мои курсы</span>
-				<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-					<path
-						d="M4 6l4 4 4-4"
-						stroke="currentColor"
-						stroke-width="1.5"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-			</button>
+        <!-- Правая часть -->
+        <div class="header-right">
 
-			<a href="#" class="text-link">Все курсы</a>
+            <!-- Поиск -->
+            <div class="header-search" style="position:relative;">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+                    <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="course-search" class="search-input" placeholder="Поиск по курсам..." autocomplete="off">
+                <div id="search-dropdown" style="display:none;position:absolute;top:110%;left:0;width:100%;min-width:220px;background:#2c2c2c;border:1px solid #393939;border-radius:8px;z-index:999;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.3);"></div>
+            </div>
 
-			<button class="user-avatar">
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-					<circle cx="12" cy="12" r="11" fill="#32B8C6" />
-					<path
-						d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-						fill="white"
-					/>
-				</svg>
-			</button>
+            <!-- Уведомления -->
+            {% if user.is_authenticated %}
+            <div style="position:relative;">
+                <button class="notif-btn" id="notifBtn" title="Уведомления">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" style="display:none"></span>
+                </button>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">
+                        <span>Уведомления</span>
+                        <button id="markAllRead">Прочитать все</button>
+                    </div>
+                    <div id="notifList">
+                        <p style="padding:16px;color:#888;font-size:13px;">Загрузка...</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
-			<!-- Mobile Menu Button -->
-			<button class="mobile-menu-btn" aria-label="Меню">
-				<span></span>
-				<span></span>
-				<span></span>
-			</button>
-		</div>
-	</div>
+            <!-- 🪙 Монеты -->
+            {% if user.is_authenticated %}
+            <div style="display:flex;align-items:center;gap:5px;
+                background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);
+                border-radius:20px;padding:4px 12px;">
+                <span style="font-size:14px;">🪙</span>
+                <span style="font-size:13px;font-weight:700;color:#ffd700;">{{ user_balance }}</span>
+            </div>
+            {% endif %}
 
-	<!-- Mobile Navigation -->
-	<nav class="mobile-nav">
-		<a href="#" class="mobile-nav-item">Мои курсы</a>
-		<a href="#" class="mobile-nav-item">Все курсы</a>
-	</nav>
+            <!-- Аватар + ник -->
+            {% if user.is_authenticated %}
+            <div class="user-menu" id="userMenu">
+                <button class="user-info-btn" id="userMenuBtn">
+                    <div class="user-avatar-circle">
+                        {{ user.first_name|first|upper|default:user.username|first|upper }}
+                    </div>
+                    <span class="user-name-text">{{ user.first_name|default:user.username }}</span>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="{% url 'prac:profile' %}" class="dropdown-item">👤 Профиль</a>
+                    <a href="{% url 'prac:settings' %}" class="dropdown-item">⚙️ Настройки</a>
+                    <div class="dropdown-divider"></div>
+                    <form method="POST" action="{% url 'logout' %}" style="margin:0">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item dropdown-item-danger"
+                                style="width:100%;text-align:left;background:none;border:none;cursor:pointer;font-size:14px;padding:10px 16px;">
+                            🚪 Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="text-link">Войти</a>
+            {% endif %}
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        {% if user.is_authenticated %}
+        <a href="{% url 'prac:profile' %}" class="mobile-nav-item">👤 Профиль</a>
+        <a href="{% url 'prac:settings' %}" class="mobile-nav-item">⚙️ Настройки</a>
+        <form method="POST" action="{% url 'logout' %}" style="margin:0">
+            {% csrf_token %}
+            <button type="submit" class="mobile-nav-item"
+                    style="width:100%;text-align:left;background:none;border:none;cursor:pointer;font-size:15px;padding:12px;color:inherit;">
+                🚪 Выйти
+            </button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}" class="mobile-nav-item">🔑 Войти</a>
+        {% endif %}
+    </nav>
 </header>
 
 <script>
-	// Mobile Menu Toggle
-	const mobileMenuBtn = document.querySelector('.mobile-menu-btn')
-	const mobileNav = document.querySelector('.mobile-nav')
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn')
+    const mobileNav = document.querySelector('.mobile-nav')
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenuBtn.classList.toggle('active')
+        mobileNav.classList.toggle('active')
+    })
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.mobile-menu-btn') && !e.target.closest('.mobile-nav')) {
+            mobileMenuBtn.classList.remove('active')
+            mobileNav.classList.remove('active')
+        }
+    })
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            mobileMenuBtn.classList.remove('active')
+            mobileNav.classList.remove('active')
+        }
+    })
 
-	mobileMenuBtn.addEventListener('click', () => {
-		mobileMenuBtn.classList.toggle('active')
-		mobileNav.classList.toggle('active')
-	})
+    const userMenuBtn = document.getElementById('userMenuBtn')
+    const userDropdown = document.getElementById('userDropdown')
+    if (userMenuBtn) {
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation()
+            userDropdown.classList.toggle('open')
+        })
+        document.addEventListener('click', () => {
+            userDropdown.classList.remove('open')
+        })
+    }
 
-	// Close mobile menu when clicking outside
-	document.addEventListener('click', e => {
-		if (
-			!e.target.closest('.mobile-menu-btn') &&
-			!e.target.closest('.mobile-nav')
-		) {
-			mobileMenuBtn.classList.remove('active')
-			mobileNav.classList.remove('active')
-		}
-	})
+    // ===== ПОИСК =====
+    const searchInput = document.getElementById('course-search')
+    const searchDropdown = document.getElementById('search-dropdown')
+    let searchTimer
 
-	// Close mobile menu on resize
-	window.addEventListener('resize', () => {
-		if (window.innerWidth > 768) {
-			mobileMenuBtn.classList.remove('active')
-			mobileNav.classList.remove('active')
-		}
-	})
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer)
+        const q = searchInput.value.trim()
+        if (!q) { searchDropdown.style.display = 'none'; return; }
+        searchTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/search/?q=${encodeURIComponent(q)}`)
+                const data = await res.json()
+                if (!data.results.length) {
+                    searchDropdown.innerHTML = `<div style="padding:10px 14px;color:#888;font-size:13px;">Ничего не найдено</div>`
+                } else {
+                    searchDropdown.innerHTML = data.results.map(c =>
+                        `<a href="/course/${c.id}/" style="display:block;padding:10px 14px;color:#f5f5f5;font-size:14px;transition:background 0.15s;"
+                            onmouseover="this.style.background='rgba(64,158,255,0.1)'"
+                            onmouseout="this.style.background='transparent'">${c.name}</a>`
+                    ).join('')
+                }
+                searchDropdown.style.display = 'block'
+            } catch(e) { searchDropdown.style.display = 'none' }
+        }, 250)
+    })
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#course-search') && !e.target.closest('#search-dropdown'))
+            searchDropdown.style.display = 'none'
+    })
+
+    // ===== УВЕДОМЛЕНИЯ =====
+    {% if user.is_authenticated %}
+    const notifBtn = document.getElementById('notifBtn')
+    const notifDropdown = document.getElementById('notifDropdown')
+    const notifBadge = document.getElementById('notifBadge')
+    const notifList = document.getElementById('notifList')
+
+    fetch("{% url 'prac:notifications' %}")
+        .then(r => r.json())
+        .then(data => {
+            if (data.count > 0) {
+                notifBadge.style.display = 'flex'
+                notifBadge.textContent = data.count
+            }
+        })
+
+    notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        notifDropdown.classList.toggle('open')
+        fetch("{% url 'prac:notifications' %}")
+            .then(r => r.json())
+            .then(data => {
+                if (data.notifications.length === 0) {
+                    notifList.innerHTML = '<p style="padding:16px;color:#888;font-size:13px;">Нет новых уведомлений</p>'
+                } else {
+                    notifList.innerHTML = data.notifications.map(n =>
+                        `<div class="notif-item"><span>${n.text}</span><small>${n.created_at}</small></div>`
+                    ).join('')
+                }
+            })
+    })
+
+    document.getElementById('markAllRead').addEventListener('click', (e) => {
+        e.stopPropagation()
+        fetch("{% url 'prac:notifications_read' %}", {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        }).then(() => {
+            notifBadge.style.display = 'none'
+            notifList.innerHTML = '<p style="padding:16px;color:#888;font-size:13px;">Нет новых уведомлений</p>'
+            notifDropdown.classList.remove('open')
+        })
+    })
+
+    document.addEventListener('click', () => {
+        notifDropdown.classList.remove('open')
+    })
+    {% endif %}
 </script>
+

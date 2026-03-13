@@ -14,11 +14,19 @@
 	<div class="course-header">
 		<div class="course-title-wrapper">
 			<h1 class="course-title">{{ course.name }}</h1>
-			<div class="course-progress">
-				<span class="progress-circle"></span>
-				<span class="progress-text">100%</span>
-			</div>
-		</div>
+            <div class="course-progress">
+                <svg class="progress-ring" width="36" height="36" viewBox="0 0 36 36">
+                    <circle class="progress-ring-bg" cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+                    <circle class="progress-ring-fill" cx="18" cy="18" r="15" fill="none"
+                        stroke="#32B8C6" stroke-width="3"
+                        stroke-dasharray="94.2"
+                        stroke-dashoffset="{{ progress_ring_offset }}"
+                        stroke-linecap="round"
+                        transform="rotate(-90 18 18)"/>
+                </svg>
+                <span class="progress-text">{{ progress_percent }}%</span>
+            </div>
+        </div>
 		<h2 class="section-title">Программа курса</h2>
 	</div>
 

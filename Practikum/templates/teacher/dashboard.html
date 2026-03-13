@@ -13,6 +13,7 @@
             <a href="{% url 'prac:teacher_students' %}">Студенты</a>
             <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
             <a href="{% url 'prac:teacher_tasks' %}">Задания</a> 
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
             <a href="{% url 'prac:profile' %}">Профиль</a>
         </nav>
     </div>
@@ -109,7 +110,7 @@
                             <td><strong>{{ course.name }}</strong></td>
                             <td><span class="badge badge-primary">{{ course.students_count }}</span></td>
                             <td>
-                                <a href="/admin/Logistic_Task/course/{{ course.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
+                                <a href="{% url 'prac:teacher_course_edit' course.id %}" class="btn btn-primary btn-sm">Редактировать</a>
                             </td>
                         </tr>
                         {% endfor %}

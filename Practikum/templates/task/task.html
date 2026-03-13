@@ -7,15 +7,20 @@
 {% block content %}
 <div class="task-container">
     <div class="task-header">
-        <h1 class="task-title">Мои задачи</h1>
-        <p class="task-subtitle">Отслеживайте прогресс выполнения заданий</p>
-    </div>
-
-    <!-- Фильтры -->
-    <div class="task-filters">
-        <button class="filter-btn active" data-filter="all">Все задачи</button>
-        <button class="filter-btn" data-filter="active">Активные</button>
-        <button class="filter-btn" data-filter="completed">Выполненные</button>
+        {% if in_group %}
+        <h1 class="task-title">Домашние задания</h1>
+        <p class="task-subtitle">Группа: <strong>{{ group.name }}</strong></p>
+        {% else %}
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+                <h1 class="task-title">Мои задачи</h1>
+                <p class="task-subtitle">Личный список задач</p>
+            </div>
+            <button class="filter-btn active" onclick="document.getElementById('add-task-modal').style.display='flex'">
+                + Добавить задачу
+            </button>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Статистика -->
@@ -24,7 +29,7 @@
             <div class="stat-icon">📝</div>
             <div class="stat-content">
                 <div class="stat-value">{{ total }}</div>
-                <div class="stat-label">Всего задач</div>
+                <div class="stat-label">Всего</div>
             </div>
         </div>
         <div class="stat-card">
@@ -43,46 +48,137 @@
         </div>
     </div>
 
+    <!-- Фильтры -->
+    <div class="task-filters">
+        <button class="filter-btn active" data-filter="all">Все</button>
+        <button class="filter-btn" data-filter="active">Активные</button>
+        <button class="filter-btn" data-filter="completed">Выполненные</button>
+    </div>
+
     <!-- Список задач -->
     <div class="tasks-list">
-        {% for item in tasks_data %}
-        <div class="task-item" data-status="{% if item.is_completed %}completed{% elif item.attempts > 0 %}active{% else %}active{% endif %}">
-            <div class="task-checkbox">
-                <input type="checkbox" id="task{{ item.task.id }}"
-                       {% if item.is_completed %}checked disabled{% endif %}>
-                <label for="task{{ item.task.id }}"></label>
-            </div>
-            <div class="task-content">
-                <h3 class="task-name {% if item.is_completed %}completed-text{% endif %}">
-                    {{ item.task.name }}
-                </h3>
-                <div class="task-meta">
-                    <span class="task-course">📚 {{ item.task.topic_set.first.course_set.first.name|default:"Курс" }}</span>
+
+        {% if in_group %}
+            {% for item in tasks_data %}
+            <div class="task-item" data-status="{% if item.is_completed %}completed{% else %}active{% endif %}">
+                <div class="task-checkbox">
+                    <input type="checkbox" id="task{{ item.task.id }}" {% if item.is_completed %}checked disabled{% endif %}>
+                    <label for="task{{ item.task.id }}"></label>
+                </div>
+                <div class="task-content">
+                    <h3 class="task-name {% if item.is_completed %}completed-text{% endif %}">{{ item.task.name }}</h3>
+                    <div class="task-meta">
+                        <span class="task-course">👨‍🏫 {{ item.teacher }}</span>
+                        {% if item.deadline %}
+                        <span class="task-deadline" style="color:{% if item.is_completed %}#32B8C6{% else %}#ff7675{% endif %}">
+                            🕐 Дедлайн: {{ item.deadline|date:"d M Y, H:i" }}
+                        </span>
+                        {% endif %}
+                        {% if item.attempts > 0 and not item.is_completed %}
+                        <span style="color:#888;font-size:12px;">Попыток: {{ item.attempts }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="task-status">
                     {% if item.is_completed %}
-                        <span class="task-deadline">Выполнено: {{ item.completed_at|date:"d M Y" }}</span>
-                    {% elif item.attempts > 0 %}
-                        <span class="task-deadline">Попыток: {{ item.attempts }}</span>
+                        <span class="status-badge status-completed">Выполнена</span>
+                    {% else %}
+                        <span class="status-badge status-active">Активна</span>
                     {% endif %}
+                    <a href="{% url 'task_mananger:course_task' course_id=item.task.topic_set.first.course_set.first.id task_id=item.task.id %}"
+                       class="btn-open">Открыть →</a>
                 </div>
             </div>
-            <div class="task-status">
-                {% if item.is_completed %}
-                    <span class="status-badge status-completed">Выполнена</span>
-                {% else %}
-                    <span class="status-badge status-active">Активна</span>
-                {% endif %}
-                <a href="{% url 'task_mananger:course_task' course_id=item.task.topic_set.first.course_set.first.id task_id=item.task.id %}"
-                   class="btn-open">Открыть →</a>
+            {% empty %}
+            <div style="text-align:center;padding:40px;color:#888;">
+                <p>Преподаватель ещё не назначил домашних заданий.</p>
             </div>
-        </div>
-        {% empty %}
-        <div style="text-align:center; padding: 40px; color: #888;">
-            <p>У вас пока нет задач.<br>Запишитесь на курс чтобы начать.</p>
-            <a href="{% url 'prac:course' %}" class="filter-btn active">К курсам</a>
-        </div>
-        {% endfor %}
+            {% endfor %}
+
+        {% else %}
+            {% for pt in personal_tasks %}
+            <div class="task-item" data-status="{% if pt.is_completed %}completed{% else %}active{% endif %}">
+                <div class="task-checkbox">
+                    {% if not pt.is_completed %}
+                    <form method="POST" style="margin:0">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="complete">
+                        <input type="hidden" name="task_id" value="{{ pt.id }}">
+                        <input type="checkbox" id="pt{{ pt.id }}" onchange="this.form.submit()">
+                        <label for="pt{{ pt.id }}"></label>
+                    </form>
+                    {% else %}
+                    <input type="checkbox" checked disabled>
+                    {% endif %}
+                </div>
+                <div class="task-content">
+                    <h3 class="task-name {% if pt.is_completed %}completed-text{% endif %}">{{ pt.title }}</h3>
+                    <div class="task-meta">
+                        {% if pt.description %}
+                        <span style="color:#aaa;font-size:13px;">{{ pt.description|truncatechars:60 }}</span>
+                        {% endif %}
+                        {% if pt.deadline %}
+                        <span class="task-deadline" style="color:{% if pt.is_completed %}#32B8C6{% else %}#ff7675{% endif %}">
+                            🕐 {{ pt.deadline|date:"d M Y, H:i" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="task-status">
+                    {% if pt.is_completed %}
+                        <span class="status-badge status-completed">Выполнена</span>
+                    {% else %}
+                        <span class="status-badge status-active">Активна</span>
+                    {% endif %}
+                    <form method="POST" style="margin:0">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="task_id" value="{{ pt.id }}">
+                        <button type="submit" style="background:none;border:none;cursor:pointer;color:#ff7675;font-size:18px;padding:4px 8px;" title="Удалить">✕</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align:center;padding:40px;color:#888;">
+                <p>Задач пока нет. Добавьте первую!</p>
+            </div>
+            {% endfor %}
+        {% endif %}
+
     </div>
 </div>
+
+<!-- Модальное окно создания задачи (только для не-группы) -->
+{% if not in_group %}
+<div id="add-task-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#2c2c2c;border-radius:12px;padding:28px;width:100%;max-width:460px;border:1px solid #393939;">
+        <h3 style="margin-bottom:20px;font-size:18px;">Новая задача</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            <div style="margin-bottom:14px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Название *</label>
+                <input type="text" name="title" required placeholder="Что нужно сделать?"
+                    style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;outline:none;">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Описание</label>
+                <textarea name="description" rows="3" placeholder="Подробности..."
+                    style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;outline:none;resize:vertical;"></textarea>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Дедлайн</label>
+                <input type="datetime-local" name="deadline"
+                    style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;outline:none;">
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" class="filter-btn active" style="flex:1;">Создать</button>
+                <button type="button" class="filter-btn" style="flex:1;" onclick="document.getElementById('add-task-modal').style.display='none'">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 
 <script src='{% static "js/task.js" %}'></script>
 {% endblock %}

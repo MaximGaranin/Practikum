@@ -13,6 +13,7 @@
             <a href="{% url 'prac:teacher_students' %}">Студенты</a>
             <a href="{% url 'prac:teacher_courses' %}" class="active">Курсы</a>
             <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
             <a href="{% url 'prac:profile' %}">Профиль</a>
         </nav>
     </div>
@@ -60,7 +61,7 @@
     <div class="section">
         <div class="section-header">
             <h2>Все курсы</h2>
-            <a href="/admin/Logistic_Task/course/add/" class="btn btn-success btn-sm">+ Создать курс</a>
+            <a href="{% url 'prac:teacher_course_create' %}" class="btn btn-success btn-sm">+ Создать курс</a>
         </div>
         <div class="section-content">
             {% if courses %}
@@ -100,8 +101,8 @@
                         {% endif %}
                     </div>
                     <div class="course-card-footer">
-                        <a href="/admin/Logistic_Task/course/{{ course.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
-                        <a href="/admin/Logistic_Task/course/{{ course.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
+                        <a href="{% url 'prac:teacher_course_edit' course.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                        <a href="{% url 'prac:teacher_course_delete' course.id %}" class="btn btn-danger btn-sm">Удалить</a>
                     </div>
                 </div>
                 {% endfor %}

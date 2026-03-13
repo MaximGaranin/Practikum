@@ -79,34 +79,41 @@ body {
 .course-title-wrapper {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 16px;
 	margin-bottom: 24px;
+	height: 36px;
 }
 
 .course-title {
 	font-size: 24px;
 	font-weight: 600;
 	color: var(--color-gray-200);
+	margin: 0;
+	line-height: 1.2;
 }
 
+/* === Прогресс кольцо === */
 .course-progress {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	height: 36px;
 }
 
-.progress-circle {
-	width: 20px;
-	height: 20px;
-	border: 2px solid #32b8c6;
-	border-radius: 50%;
-	background-color: transparent;
+.progress-ring {
+	flex-shrink: 0;
+	display: block;
+}
+
+.progress-ring-fill {
+	transition: stroke-dashoffset 0.5s ease;
 }
 
 .progress-text {
-	font-size: 24px;
-	font-weight: 500;
+	font-size: 18px;
+	font-weight: 600;
 	color: var(--color-gray-200);
+	line-height: 1;
 }
 
 .section-title {
@@ -132,7 +139,6 @@ body {
 	position: relative;
 }
 
-/* Эффект подсветки при наведении */
 .topic-card::before {
 	content: '';
 	position: absolute;
@@ -179,15 +185,14 @@ body {
 .topic-image img {
 	width: 100%;
 	height: 100%;
-	object-fit: cover; /* Заполняет весь контейнер, обрезая по краям */
+	object-fit: cover;
 	transition: transform 0.3s ease;
 }
 
 .topic-card:hover .topic-image img {
-	transform: scale(1.05); /* Легкий zoom при наведении */
+	transform: scale(1.05);
 }
 
-/* Placeholder для эмодзи, если нет картинки */
 .placeholder-icon {
 	font-size: 4rem;
 	display: flex;
@@ -256,7 +261,6 @@ body {
 	box-shadow: none;
 }
 
-/* === Дополнительные утилиты === */
 a {
 	text-decoration: none;
 	color: inherit;
@@ -307,4 +311,9 @@ button {
 		padding: 0.75rem 1.25rem;
 		font-size: 13px;
 	}
+
+	.progress-text {
+		font-size: 16px;
+	}
 }
+

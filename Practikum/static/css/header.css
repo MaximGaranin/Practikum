@@ -358,3 +358,189 @@ body {
         font-size: 16px;
     }
 }
+
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 300px;
+    background: #262828;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 2000;
+    overflow: hidden;
+}
+.notif-dropdown.open { display: block; }
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+    font-weight: 600;
+    color: #e0e0e0;
+}
+.notif-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+    color: #ccc;
+}
+.notif-item small { color: #666; font-size: 11px; }
+.notif-item:hover { background: rgba(255,255,255,0.05); }
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #FF5630;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Позиционирование относительно кнопки */
+.notif-btn { position: relative; }
+/* Поиск */
+.header-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 7px 12px 7px 34px;
+    color: var(--color-gray-200);
+    font-size: 13px;
+    width: 200px;
+    transition: all 0.2s;
+}
+.search-input:focus {
+    outline: none;
+    width: 260px;
+    background: rgba(255,255,255,0.12);
+}
+.search-input::placeholder { color: var(--color-gray-400); }
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--color-gray-400);
+    pointer-events: none;
+}
+
+/* Уведомления */
+.notif-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-gray-200);
+    position: relative;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.notif-btn:hover { background: rgba(255,255,255,0.08); }
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    color: #FF5630;
+    font-size: 10px;
+    line-height: 1;
+}
+
+/* User menu */
+.user-menu { position: relative; }
+.user-info-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--color-gray-200);
+    transition: all 0.2s;
+}
+.user-info-btn:hover { background: rgba(255,255,255,0.08); }
+.user-avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #32B8C6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+.user-name-text {
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dropdown */
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #262828;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 2000;
+    overflow: hidden;
+}
+.user-dropdown.open { display: block; }
+.dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: var(--color-gray-200);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.15s;
+}
+.dropdown-item:hover { background: rgba(255,255,255,0.07); }
+.dropdown-item-danger { color: #ff6b6b; }
+.dropdown-item-danger:hover { background: rgba(255,107,107,0.1); }
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 4px 0;
+}
+
+/* Светлая тема */
+.light-theme .search-input {
+    background: rgba(0,0,0,0.05);
+    border-color: #ddd;
+    color: #1f2121;
+}
+.light-theme .user-info-btn {
+    border-color: #ddd;
+}
+.light-theme .user-dropdown {
+    background: #ffffff;
+    border-color: #e0e0e0;
+}
+.light-theme .dropdown-item { color: #1f2121; }

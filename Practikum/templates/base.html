@@ -28,10 +28,9 @@
 </body>
 
 <script>
-    const theme = localStorage.getItem('theme') || 'dark';
-    if (theme === 'light') {
-        document.documentElement.classList.add('light-theme');
-    }
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
 </script>
 
 </html>

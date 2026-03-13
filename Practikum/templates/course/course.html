@@ -36,23 +36,43 @@
 	</div>
 
 	<!-- Сетка курсов -->
-	<div class="courses-grid">
-		{% for course in courses %}
-		<div class="course-card">
-			<div class="course-icon">📚</div>
-			<h3 class="course-name">{{ course.name }}</h3>
-			<p class="course-description">
-				Количество тем: {{ course.topics.count }}<br />
-				Студентов: {{ course.students.count }}
-			</p>
-			<a
-				href="{% url 'task_mananger:course_program' course_id=course.id %}"
-				class="course-btn"
-			>
-				Продолжить обучение
-			</a>
-			{% endfor %}
-		</div>
+	<div class="courses-grid">	
+    
+{% for item in courses %}
+<div class="course-card {% if item.is_locked %}course-locked{% endif %}">
+    <div class="course-icon">📚</div>
+
+    {% if item.is_locked %}
+    <div class="lock-badge">🔒</div>
+    {% endif %}
+
+    <h3 class="course-name">{{ item.course.name }}</h3>
+    <p class="course-description">
+        Тем: {{ item.topics_count }}<br>
+        Студентов: {{ item.students_count }}
+    </p>
+
+    {% if item.is_locked %}
+    <p class="locked-text">Доступно после зачисления в группу</p>
+    <button class="course-btn course-btn-locked" disabled>🔒 Недоступно</button>
+    {% else %}
+    <div class="course-progress">
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ item.progress }}%"></div>
+        </div>
+        <span class="progress-label">
+            {% if item.progress == 100 %}✅ {{ item.progress }}%
+            {% elif item.progress > 0 %}🔄 {{ item.progress }}%
+            {% else %}⭕ Не начат{% endif %}
+        </span>
+    </div>
+    <a href="{% url 'task_mananger:course_program' course_id=item.course.id %}" class="course-btn">
+        {% if item.progress == 100 %}Повторить{% elif item.progress > 0 %}Продолжить{% else %}Начать{% endif %}
+    </a>
+    {% endif %}
+</div>
+{% endfor %}
+	</div>
 	</div>
 	{% endif %} {% endblock %}
 </div>

@@ -13,6 +13,7 @@
             <a href="{% url 'prac:teacher_students' %}">Студенты</a>
             <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
             <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
             <a href="{% url 'prac:profile' %}">Профиль</a>
         </nav>
     </div>
@@ -25,7 +26,6 @@
     <div class="section">
         <div class="section-header">
             <h2>Личная информация</h2>
-            <a href="/admin/practikum/student/{{ student.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
         </div>
         <div class="section-content">
             <div class="student-detail-grid">

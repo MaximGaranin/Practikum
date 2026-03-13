@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/check/', views.check_task, name='check_task'),
     path('api/save/', views.save_code, name='save_code'),
     path('api/load/<int:task_id>/', views.load_saved_code, name='load_saved_code'),
+    path('api/search/', views.search_courses, name='search_courses'),
 ]
 
 if settings.DEBUG:

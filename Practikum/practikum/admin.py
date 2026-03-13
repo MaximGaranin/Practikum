@@ -4,10 +4,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.db import models, transaction
 from Logistic_Task.models import Course, Topic, Task, UserTaskProgress
+from .models import Homework, PersonalTask
 from .models import (
     Student, Group, Enrollment, Teacher, CourseTeacherGroup
 )
-
+from .models import Achievement, UserAchievement, Contest, ContestScore, CodeReview, Submission, TestCase
 
 # ============= INLINE КЛАССЫ =============
 
@@ -233,7 +234,7 @@ class CourseTeacherGroupAdmin(admin.ModelAdmin):
     readonly_fields = ['start_date']
     
     fieldsets = (
-        ('Назначение', {
+       ('Назначение', {
             'fields': ('teacher', 'course', 'group')
         }),
         ('Информация', {
@@ -370,7 +371,27 @@ class UserTaskProgressAdmin(admin.ModelAdmin):
     readonly_fields = ['completed_at', 'attempts']
 
 
+@admin.register(Homework)
+class HomeworkAdmin(admin.ModelAdmin):
+    list_display = ['task', 'group', 'teacher', 'deadline']
+    list_filter = ['group', 'teacher']
+
+
+@admin.register(PersonalTask)
+class PersonalTaskAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'deadline', 'is_completed']
+    list_filter = ['is_completed']
+
+
 # Перерегистрируем User с новыми inline
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
+
+admin.site.register(Achievement)
+admin.site.register(UserAchievement)
+admin.site.register(Contest)
+admin.site.register(ContestScore)
+admin.site.register(CodeReview)
+admin.site.register(Submission)
+admin.site.register(TestCase)

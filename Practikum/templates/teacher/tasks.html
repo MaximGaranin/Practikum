@@ -13,6 +13,7 @@
             <a href="{% url 'prac:teacher_students' %}">Студенты</a>
             <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
             <a href="{% url 'prac:teacher_tasks' %}" class="active">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}">ДЗ</a>
             <a href="{% url 'prac:profile' %}">Профиль</a>
         </nav>
     </div>
@@ -52,7 +53,7 @@
     <div class="section">
         <div class="section-header">
             <h2>Темы курсов</h2>
-            <a href="/admin/Logistic_Task/topic/add/" class="btn btn-success btn-sm">+ Создать тему</a>
+            <a href="{% url 'prac:teacher_topic_create' %}" class="btn btn-success btn-sm">+ Создать тему</a>
         </div>
         <div class="section-content">
             {% if topics %}
@@ -72,8 +73,8 @@
                             </div>
                         </div>
                         <div class="topic-actions">
-                            <a href="/admin/Logistic_Task/topic/{{ topic.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
-                            <a href="/admin/Logistic_Task/topic/{{ topic.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
+                            <a href="{% url 'prac:teacher_topic_edit' topic.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                            <a href="{% url 'prac:teacher_topic_delete' topic.id %}" class="btn btn-danger btn-sm">Удалить</a>
                         </div>
                     </div>
                 </div>
@@ -94,7 +95,7 @@
     <div class="section">
         <div class="section-header">
             <h2>Все задания</h2>
-            <a href="/admin/Logistic_Task/task/add/" class="btn btn-success btn-sm">+ Создать задание</a>
+            <a href="{% url 'prac:teacher_task_create' %}" class="btn btn-success btn-sm">+ Создать задание</a>
         </div>
         <div class="section-content">
             {% if tasks %}
@@ -131,9 +132,8 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="/admin/Logistic_Task/task/{{ task.id }}/change/" class="btn btn-primary btn-sm">Редактировать</a>
-                                <a href="/admin/Logistic_Task/task/{{ task.id }}/delete/" class="btn btn-danger btn-sm">Удалить</a>
-                            </td>
+                                <a href="{% url 'prac:teacher_task_edit' task.id %}" class="btn btn-primary btn-sm">Редактировать</a>
+                                <a href="{% url 'prac:teacher_task_delete' task.id %}" class="btn btn-danger btn-sm">Удалить</a>                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -157,13 +157,13 @@
         </div>
         <div class="section-content">
             <div class="quick-actions">
-                <a href="/admin/Logistic_Task/task/add/" class="quick-action-card">
+                <a href="{% url 'prac:teacher_task_create' %}" class="quick-action-card">
                     <div class="quick-action-icon">📝</div>
                     <div class="quick-action-title">Создать задание</div>
                     <div class="quick-action-desc">Добавить новое задание для студентов</div>
                 </a>
                 
-                <a href="/admin/Logistic_Task/topic/add/" class="quick-action-card">
+                <a href="{% url 'prac:teacher_topic_create' %}" class="quick-action-card">
                     <div class="quick-action-icon">📖</div>
                     <div class="quick-action-title">Создать тему</div>
                     <div class="quick-action-desc">Организовать задания по темам</div>

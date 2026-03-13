@@ -1,0 +1,32 @@
+{% load static %}
+{% block link %}<link rel="stylesheet" href="{% static 'css/teacher.css' %}">{% endblock %}
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>🗑️ Удаление</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:profile' %}">Профиль</a>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="section" style="max-width:500px;margin-top:40px;">
+        <div class="section-content" style="text-align:center;padding:40px;">
+            <div style="font-size:48px;margin-bottom:20px;">⚠️</div>
+            <h2 style="margin-bottom:10px;">Подтвердите удаление</h2>
+            <p style="color:var(--text-muted);margin-bottom:30px;">
+                Вы уверены, что хотите удалить <strong>«{{ object_name }}»</strong>? Это действие необратимо.
+            </p>
+            <form method="POST" style="display:inline-flex;gap:12px;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">🗑️ Да, удалить</button>
+                <a href="{% url cancel_url %}" class="btn btn-primary">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

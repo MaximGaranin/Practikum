@@ -4,19 +4,39 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import json
-
 from . import models
-from editor.code_analyzer import CodeAnalyzer  # Новый импорт
-from editor.docker_executor import DockerExecutor  # Новый импорт
-
+from editor.code_analyzer import CodeAnalyzer
+from editor.docker_executor import DockerExecutor
+from Logistic_Task.models import UserTaskProgress
+import math
 
 def course_program(request, course_id=None):
     course = get_object_or_404(models.Course, id=course_id)
     list_topic = course.topics.all().order_by('id')
+
+    # Считаем прогресс по курсу
+    progress_percent = 0
+    progress_ring_offset = 94.2
+
+    if request.user.is_authenticated:
+        total_tasks = models.Task.objects.filter(
+            topic__course=course
+        ).distinct().count()
+
+        if total_tasks > 0:
+            completed = UserTaskProgress.objects.filter(
+                user=request.user,
+                task__topic__course=course,
+                is_completed=True
+            ).count()
+            progress_percent = round((completed / total_tasks) * 100)
+            progress_ring_offset = round(94.2 - (94.2 * progress_percent / 100), 2)
     context = {
         'course': course,
         'topics': list_topic,
         'course_id': course_id,
+        'progress_percent': progress_percent,
+        'progress_ring_offset': progress_ring_offset,
     }
     return render(request, 'course/course_program.html', context)
 
@@ -242,3 +262,13 @@ def load_saved_code(request, task_id):
     except Exception as e:
         return JsonResponse({'error': f'Ошибка загрузки: {str(e)}'}, status=500)
 
+
+@require_http_methods(["GET"])
+def search_courses(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+    
+    courses = models.Course.objects.filter(name__icontains=query)
+    results = [{'id': c.id, 'name': c.name} for c in courses]
+    return JsonResponse({'results': results})

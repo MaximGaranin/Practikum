@@ -243,6 +243,57 @@ body {
     box-shadow: none;
 }
 
+.course-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+}
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: #32B8C6;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+.progress-label {
+    font-size: 12px;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.course-locked {
+    opacity: 0.5;
+    position: relative;
+    filter: grayscale(50%);
+}
+
+.lock-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 20px;
+}
+
+.locked-text {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.course-btn-locked {
+    background: #555 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
 /* Адаптивность */
 @media (max-width: 1200px) {
     .courses-grid {

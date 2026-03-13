@@ -1,0 +1,98 @@
+{% load static %}
+{% block link %}<link rel="stylesheet" href="{% static 'css/teacher.css' %}">{% endblock %}
+
+{% block content %}
+<div class="teacher-header">
+    <div class="container">
+        <h1>📋 Назначить домашнее задание</h1>
+        <nav class="teacher-nav">
+            <a href="{% url 'prac:teacher_dashboard' %}">Главная</a>
+            <a href="{% url 'prac:teacher_students' %}">Студенты</a>
+            <a href="{% url 'prac:teacher_courses' %}">Курсы</a>
+            <a href="{% url 'prac:teacher_tasks' %}">Задания</a>
+            <a href="{% url 'prac:teacher_assign_homework' %}" class="active">ДЗ</a>
+            <a href="{% url 'prac:profile' %}">Профиль</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div style="padding:12px 16px;border-radius:8px;margin-bottom:16px;
+        background:{% if msg.tags == 'success' %}rgba(50,184,198,0.15){% elif msg.tags == 'error' %}rgba(255,118,117,0.15){% else %}rgba(255,200,0,0.1){% endif %};
+        border:1px solid {% if msg.tags == 'success' %}#32B8C6{% elif msg.tags == 'error' %}#ff7675{% else %}#ffd700{% endif %};">
+        {{ msg }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Форма назначения -->
+    <div class="section">
+        <div class="section-header"><h2>Новое задание</h2></div>
+        <div class="section-content">
+            <form method="POST" style="display:grid;gap:16px;max-width:560px;">
+                {% csrf_token %}
+                <div>
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Группа *</label>
+                    <select name="group" required style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;">
+                        <option value="">— Выберите группу —</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Задание *</label>
+                    <select name="task" required style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;">
+                        <option value="">— Выберите задание —</option>
+                        {% for task in tasks %}
+                        <option value="{{ task.id }}">{{ task.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:13px;">Дедлайн *</label>
+                    <input type="datetime-local" name="deadline" required style="width:100%;padding:10px 12px;background:#1f2121;border:1px solid #393939;border-radius:8px;color:#f5f5f5;font-size:14px;">
+                </div>
+                <button type="submit" class="btn btn-success" style="width:fit-content;padding:10px 24px;">
+                    📤 Назначить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Текущие ДЗ -->
+    <div class="section">
+        <div class="section-header"><h2>Назначенные ДЗ</h2></div>
+        <div class="section-content">
+            {% if homeworks %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Задание</th>
+                        <th>Группа</th>
+                        <th>Дедлайн</th>
+                        <th>Назначено</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hw in homeworks %}
+                    <tr>
+                        <td><strong>{{ hw.task.name }}</strong></td>
+                        <td>{{ hw.group.name }}</td>
+                        <td style="color:#ff7675;">{{ hw.deadline|date:"d M Y, H:i" }}</td>
+                        <td style="color:#888;font-size:13px;">{{ hw.created_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color:#888;padding:20px 0;">Ещё не назначено ни одного ДЗ.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

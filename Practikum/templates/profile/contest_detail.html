@@ -1,0 +1,99 @@
+{% extends "base.html" %} {% load static %} {% block link %}
+<link rel="stylesheet" href='{% static "css/profile.css" %}' />
+{% endblock %} {% block content %}
+
+<div class="profile-container">
+    <div class="profile-box">
+
+        <!-- Шапка -->
+        <div class="profile-header" style="text-align:left;align-items:flex-start;">
+            <a href="{% url 'prac:profile' %}"
+               style="font-size:13px;color:#666;text-decoration:none;margin-bottom:12px;display:inline-block;">
+                ← Назад в профиль
+            </a>
+            <h2 class="username" style="margin-top:8px;">{{ contest.title }}</h2>
+            <div style="display:flex;gap:16px;margin-top:8px;">
+                <span style="font-size:13px;color:#666;">
+                    🕐 Начало: {{ contest.start_time|date:"d.m.Y H:i" }}
+                </span>
+                <span style="font-size:13px;color:#666;">
+                    🏁 Конец: {{ contest.end_time|date:"d.m.Y H:i" }}
+                </span>
+                <span style="font-size:13px;color:#56d364;">
+                    📋 Задач: {{ tasks.count }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Задачи -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Задачи</h3>
+            {% if tasks %}
+            {% for task in tasks %}
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
+                border-radius:10px;padding:14px 18px;margin-bottom:8px;">
+                <div>
+                    <div style="font-size:14px;font-weight:600;color:#e0e0e0;">
+                        {{ forloop.counter }}. {{ task.name }}
+                    </div>
+                    {% if task.description %}
+                    <div style="font-size:12px;color:#666;margin-top:4px;">
+                        {{ task.description|truncatechars:80 }}
+                    </div>
+                    {% endif %}
+                </div>
+                <a href="#"
+                   style="background:rgba(64,158,255,0.15);color:#409eff;font-size:12px;
+                          font-weight:600;padding:6px 14px;border-radius:6px;
+                          text-decoration:none;white-space:nowrap;margin-left:16px;">
+                    Решить
+                </a>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:#666;font-size:13px;">Задачи ещё не добавлены.</p>
+            {% endif %}
+        </div>
+
+        <!-- Рейтинг -->
+        <div class="info-section" style="margin-top:24px;">
+            <h3 class="section-title">Рейтинг участников</h3>
+            {% if scores %}
+            {% for s in scores %}
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                background:{% if forloop.counter == 1 %}rgba(255,215,0,0.06)
+                           {% elif forloop.counter == 2 %}rgba(192,192,192,0.06)
+                           {% elif forloop.counter == 3 %}rgba(205,127,50,0.06)
+                           {% else %}rgba(255,255,255,0.02){% endif %};
+                border:1px solid {% if forloop.counter == 1 %}rgba(255,215,0,0.2)
+                                  {% elif forloop.counter == 2 %}rgba(192,192,192,0.2)
+                                  {% elif forloop.counter == 3 %}rgba(205,127,50,0.2)
+                                  {% else %}#2a2a2a{% endif %};
+                border-radius:10px;padding:12px 18px;margin-bottom:6px;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:18px;font-weight:700;
+                        color:{% if forloop.counter == 1 %}#ffd700
+                              {% elif forloop.counter == 2 %}#c0c0c0
+                              {% elif forloop.counter == 3 %}#cd7f32
+                              {% else %}#555{% endif %};">
+                        #{{ forloop.counter }}
+                    </span>
+                    <span style="font-size:14px;color:#e0e0e0;">{{ s.user.username }}</span>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:16px;font-weight:700;color:#56d364;">{{ s.score }}</div>
+                    <div style="font-size:11px;color:#555;">очков</div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:#666;font-size:13px;">Участников пока нет.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+

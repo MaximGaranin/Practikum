@@ -123,15 +123,12 @@
 </div>
 
 <script>
-// Тема
-const themeToggle = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme');
 
+// Тема — удалить всё старое, оставить только это:
 const themeToggle = document.getElementById('themeToggle');
-// Чекбокс: checked = светлая тема
-if (localStorage.getItem('theme') === 'light') {
-    themeToggle.checked = true;
-}
+
+themeToggle.checked = localStorage.getItem('theme') === 'light';
+
 themeToggle.addEventListener('change', () => {
     if (themeToggle.checked) {
         document.documentElement.classList.add('light-theme');
