@@ -15,8 +15,8 @@ from django.http import JsonResponse
 from .decorators import teacher_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
-from django.http import JsonResponse
 import json
+from django.contrib import messages
 from datetime import date, timedelta
 from django.db import models as django_models_db
 from .checker import check_submission
@@ -253,6 +253,7 @@ def profile(request, username=None):
         return render(request, 'profile/profile.html', context)
 
 
+@login_required
 def submit_solution(request, task_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -285,20 +286,6 @@ def submit_solution(request, task_id):
 
     return JsonResponse(result)
 
-
-def _check_and_grant_achievements(user, total_solved, streak):
-    """Проверяем и выдаём ачивки по условиям."""
-    rules = [
-        ('solved_count', total_solved),
-        ('streak', streak),
-    ]
-    for condition_type, value in rules:
-        qs = Achievement.objects.filter(
-            condition_type=condition_type,
-            condition_value__lte=value
-        )
-        for ach in qs:
-            UserAchievement.objects.get_or_create(user=user, achievement=ach)
 
 
 @login_required

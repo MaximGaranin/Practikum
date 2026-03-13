@@ -52,7 +52,8 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = [['student', 'group']]
-        verbose_name = 'Количество учащихся'
+        verbose_name = 'Зачисление'
+        verbose_name_plural = 'Зачисления'
 
 
 class Teacher(models.Model):
