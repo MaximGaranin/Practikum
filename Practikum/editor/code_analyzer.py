@@ -3,29 +3,6 @@ import re
 from typing import Dict, List, Tuple
 import sys
 
-# Патч Python 3.12+ — до любых других импортов
-if not hasattr(ast, 'Str'):
-    class _AstStr:
-        @classmethod
-        def __instancecheck__(cls, node):
-            return isinstance(node, ast.Constant) and isinstance(node.value, str)
-    ast.Str = _AstStr()
-
-if not hasattr(ast, 'Num'):
-    class _AstNum:
-        @classmethod
-        def __instancecheck__(cls, node):
-            return isinstance(node, ast.Constant) and isinstance(node.value, (int, float))
-    ast.Num = _AstNum()
-
-if not hasattr(ast, 'Bytes'):
-    class _AstBytes:
-        @classmethod
-        def __instancecheck__(cls, node):
-            return isinstance(node, ast.Constant) and isinstance(node.value, bytes)
-    ast.Bytes = _AstBytes()
-
-
 class CodeAnalyzer:
     """Анализирует Python код и определяет оптимальный способ выполнения"""
     

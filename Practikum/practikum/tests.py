@@ -1,4 +1,3 @@
-import ast_compat
 import pytest
 from mixer.backend.django import mixer
 from django.contrib.auth.models import User
