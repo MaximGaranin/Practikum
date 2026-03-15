@@ -1,4 +1,5 @@
 import django
+import ast_compat
 import pytest
 from django.conf import settings
 

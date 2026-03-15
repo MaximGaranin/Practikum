@@ -1,0 +1,94 @@
+/* ===== ЛИДЕРБОРД ===== */
+.leaderboard-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    margin-top: 8px;
+}
+
+.leaderboard-table thead tr th {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #666;
+    padding: 6px 14px;
+    text-align: left;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.leaderboard-table thead tr th:last-child,
+.leaderboard-table tbody tr td:last-child {
+    text-align: right;
+}
+
+.leaderboard-table tbody tr {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Золото / серебро / бронза */
+.leaderboard-table tbody tr:nth-child(1) {
+    background: rgba(255, 215, 0, 0.06);
+    border-color: rgba(255, 215, 0, 0.2);
+}
+.leaderboard-table tbody tr:nth-child(2) {
+    background: rgba(192, 192, 192, 0.06);
+    border-color: rgba(192, 192, 192, 0.2);
+}
+.leaderboard-table tbody tr:nth-child(3) {
+    background: rgba(205, 127, 50, 0.06);
+    border-color: rgba(205, 127, 50, 0.2);
+}
+
+.leaderboard-table tbody tr td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #e0e0e0;
+    vertical-align: middle;
+}
+
+/* Номер позиции */
+.lb-rank {
+    font-size: 16px;
+    font-weight: 700;
+    width: 40px;
+    text-align: center;
+}
+.lb-rank-1 { color: #ffd700; }
+.lb-rank-2 { color: #c0c0c0; }
+.lb-rank-3 { color: #cd7f32; }
+.lb-rank-n { color: #555; }
+
+/* Имя студента — ссылка */
+.lb-name {
+    font-weight: 600;
+    color: #409eff;
+    text-decoration: none;
+}
+.lb-name:hover { text-decoration: underline; }
+
+/* Монеты */
+.lb-coins {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+/* Решено задач */
+.lb-solved {
+    color: #56d364;
+    font-weight: 600;
+}
+
+/* Стрик */
+.lb-streak {
+    color: #ff7675;
+    font-weight: 600;
+    text-align: right;
+}

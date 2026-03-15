@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE =[
+    'Practikum.middleware.DisableCSRFForAPI',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

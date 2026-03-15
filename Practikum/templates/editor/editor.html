@@ -7,8 +7,6 @@
     <title>Code Editor</title>
     
     <link rel="stylesheet" href="{% static 'css/edit.css' %}">
-    
-    <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="{% static 'codemirror/lib/codemirror.css' %}">
     <link rel="stylesheet" href="{% static 'codemirror/theme/monokai.css' %}">    
     
@@ -141,40 +139,39 @@
                     <button class="icon-btn" title="Thumbs Up" onclick="submitFeedback('up')">👍</button>
                     <button class="icon-btn" title="Thumbs Down" onclick="submitFeedback('down')">👎</button>
                     <button class="icon-btn" title="Reset" onclick="resetCode()">↻</button>
-                    
-                    {% if previous_task %}
-                    <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=previous_task %}" class="icon-btn" title="Previous">←</a>
+
+                    {% if course and previous_task %}
+                        <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=previous_task %}" class="icon-btn">←</a>
                     {% else %}
-                    <button class="icon-btn" disabled style="opacity: 0.3;">←</button>
+                        <button class="icon-btn" disabled style="opacity: 0.3;">←</button>
                     {% endif %}
-                    
-                    {% if next_task %}
-                    <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=next_task %}" class="icon-btn" title="Next">→</a>
+
+                    {% if course and next_task %}
+                        <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=next_task %}" class="icon-btn">→</a>
                     {% else %}
-                    <button class="icon-btn" disabled style="opacity: 0.3;">→</button>
+                        <button class="icon-btn" disabled style="opacity: 0.3;">→</button>
+                    {% endif %}
+
+                    {% if course and next_task %}
+                        <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=next_task %}" class="btn btn-secondary" id="nextButton">Далее</a>
+                    {% elif course %}
+                        <a href="{% url 'task_mananger:course_program' course_id=course.id %}" class="btn btn-secondary">К курсу</a>
+                    {% else %}
+                        <a href="/" class="btn btn-secondary">На главную</a>
                     {% endif %}
 
                     <button class="btn btn-secondary" id="justRunButton" onclick="justRunCode()">▶ Запустить</button>
                     <button class="btn btn-primary" id="runButton" onclick="runCode()">Проверить</button>
-                    
-                    {% if next_task %}
-                    <a href="{% url 'task_mananger:course_task' course_id=course.id task_id=next_task %}" class="btn btn-secondary" id="nextButton">Далее</a>
-                    {% else %}
-                    <a href="{% url 'task_mananger:course_program' course_id=course.id %}" class="btn btn-secondary">К курсу</a>
-                    {% endif %}
                 </div>
             </div>
         </main>
     </div>
 
-   <!-- Pyodide — локально -->
     <script src="{% static 'pyodide/pyodide.js' %}"></script>
-
-    <!-- CodeMirror — локально -->
     <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
     <script src="{% static 'codemirror/mode/python/python.js' %}"></script>
     <script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
-    <script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>    
+    <script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>
 
     <script>
         let editor;
@@ -213,17 +210,13 @@
             updateExecutionMode('Готов', 'loading');
         }
 
-        // ==================== ЗАГРУЗКА PYODIDE ====================
-        // ВАЖНО: функция называется initPyodide, чтобы не конфликтовать
-        // с глобальной loadPyodide из библиотеки Pyodide
-
         async function initPyodide() {
             if (pyodide || pyodideLoading) return;
             pyodideLoading = true;
             updateExecutionMode('Загрузка Pyodide...', 'loading');
             try {
                 pyodide = await loadPyodide({
-                indexURL: "{% static 'pyodide/' %}"  // ← локальный путь
+                    indexURL: "{% static 'pyodide/' %}"
                 });
                 updateExecutionMode('Готов (Гибрид)', 'client');
             } catch (error) {
@@ -233,7 +226,6 @@
             pyodideLoading = false;
         }
 
-        // ==================== CSRF TOKEN ====================
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -256,7 +248,6 @@
                 displayOutput('⚠ Введите код для выполнения', 'error');
                 return;
             }
-
             const btn = document.getElementById('justRunButton');
             const originalText = btn.innerHTML;
             btn.disabled = true;
@@ -265,29 +256,25 @@
             updateExecutionMode('Анализ...', 'loading');
 
             try {
-                const analysisResponse = await fetch('{% url "task_mananger:analyze_code" %}', {
+                const analysisResponse = await fetch('{% url "editor:analyze_code" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id|default:"null" }} })
                 });
-
                 if (!analysisResponse.ok) throw new Error('Ошибка анализа кода');
                 const analysis = await analysisResponse.json();
                 if (analysis.error) {
                     displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
                     return;
                 }
-
-                // Выбор режима — БЕЗ checkTaskResult (false)
                 if (analysis.execution_mode === 'client' && pyodide) {
                     await executeInBrowser(code, analysis, false);
                 } else {
                     await executeOnServer(code, analysis, false);
                 }
-
             } catch (error) {
                 displayOutput(`❌ Ошибка: ${error.message}`, 'error');
                 updateExecutionMode('Ошибка', 'loading');
@@ -304,7 +291,6 @@
                 displayOutput('⚠ Введите код для выполнения', 'error');
                 return;
             }
-
             const runBtn = document.getElementById('runButton');
             const originalText = runBtn.innerHTML;
             runBtn.disabled = true;
@@ -313,29 +299,25 @@
             updateExecutionMode('Анализ...', 'loading');
 
             try {
-                const analysisResponse = await fetch('{% url "task_mananger:analyze_code" %}', {
+                const analysisResponse = await fetch('{% url "editor:analyze_code" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id|default:"null" }} })
                 });
-
                 if (!analysisResponse.ok) throw new Error('Ошибка анализа кода');
                 const analysis = await analysisResponse.json();
                 if (analysis.error) {
                     displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
                     return;
                 }
-
-                // Выбор режима — С checkTaskResult (true)
                 if (analysis.execution_mode === 'client' && pyodide) {
                     await executeInBrowser(code, analysis, true);
                 } else {
                     await executeOnServer(code, analysis, true);
                 }
-
             } catch (error) {
                 displayOutput(`❌ Ошибка: ${error.message}`, 'error');
                 updateExecutionMode('Ошибка', 'loading');
@@ -361,7 +343,6 @@ sys.stderr = StringIO()
                 const stdout = pyodide.runPython('sys.stdout.getvalue()');
                 const stderr = pyodide.runPython('sys.stderr.getvalue()');
                 const executionTime = ((performance.now() - startTime) / 1000).toFixed(3);
-
                 if (stderr) {
                     displayOutput(`❌ Ошибка:\n${stderr}`, 'error');
                 } else {
@@ -369,7 +350,6 @@ sys.stderr = StringIO()
                 }
                 updateExecutionTime(executionTime);
                 updateExecutionMode('Браузер', 'client');
-
                 if (checkResult) {
                     await checkTaskResult(code, stdout, analysis);
                 }
@@ -386,32 +366,26 @@ sys.stderr = StringIO()
             updateExecutionMode('Сервер', 'server');
             displayOutput('🚀 Выполнение на сервере...\n', 'info');
             try {
-                const response = await fetch('{% url "task_mananger:execute_code" %}', {
+                const response = await fetch('{% url "editor:execute_code" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id|default:"null" }} })
                 });
-
                 if (!response.ok) throw new Error('Ошибка выполнения на сервере');
                 const result = await response.json();
 
                 if (result.success) {
-                    // Определяем режим из ответа сервера ('local' или 'docker')
                     const isDocker = result.execution_mode === 'docker';
                     const modeLabel = isDocker ? 'Docker (офлайн)' : 'Локально';
                     const modeCss   = isDocker ? 'server' : 'client';
                     const modeIcon  = isDocker ? '🐳' : '⚡';
-
-                    // Показываем сложность если сервер её вернул
                     const scoreInfo = result.complexity_score !== undefined
-                        ? `\nСложность кода: ${result.complexity_score}`
-                        : '';
+                        ? `\nСложность кода: ${result.complexity_score}` : '';
                     const reasonInfo = result.reason
-                        ? `\nПричина: ${result.reason}`
-                        : '';
+                        ? `\nПричина: ${result.reason}` : '';
 
                     displayOutput(
                         `${modeIcon} Выполнено [${modeLabel}]${scoreInfo}${reasonInfo}\n\n${result.output || '(Нет вывода)'}`,
@@ -419,7 +393,6 @@ sys.stderr = StringIO()
                     );
                     updateExecutionTime(result.execution_time);
                     updateExecutionMode(modeLabel, modeCss);
-
                     if (checkResult) {
                         await checkTaskResult(code, result.output, result.analysis);
                     }
@@ -433,7 +406,8 @@ sys.stderr = StringIO()
                 updateExecutionMode('Ошибка', 'server');
             }
         }
-        // ==================== ПРОВЕРКА РЕЗУЛЬТАТА ЗАДАНИЯ ====================
+
+        // ==================== ПРОВЕРКА РЕЗУЛЬТАТА ====================
         async function checkTaskResult(code, output, analysis) {
             try {
                 const response = await fetch('{% url "task_mananger:check_task" %}', {
@@ -442,7 +416,7 @@ sys.stderr = StringIO()
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ task_id: {{ task.id }}, code: code, output: output })
+                    body: JSON.stringify({ task_id: {{ task.id|default:"null" }}, code: code, output: output })
                 });
                 const result = await response.json();
                 if (result.correct) {
@@ -472,13 +446,13 @@ sys.stderr = StringIO()
             }
             displayOutput('🔍 Анализ кода...', 'info');
             try {
-                const response = await fetch('{% url "task_mananger:analyze_code" %}', {
+                const response = await fetch('{% url "editor:analyze_code" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ code: code, task_id: {{ task.id }} })
+                    body: JSON.stringify({ code: code, task_id: {{ task.id|default:"null" }} })
                 });
                 const analysis = await response.json();
                 let output = '=== РЕЗУЛЬТАТ АНАЛИЗА ===\n\n';
@@ -496,7 +470,7 @@ sys.stderr = StringIO()
             }
         }
 
-        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
         function displayOutput(text, type) {
             const outputDiv = document.getElementById('output');
             outputDiv.textContent = text;

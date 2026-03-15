@@ -1,12 +1,38 @@
+import ast
+
+# Патч Python 3.12+ — ДО всех остальных импортов
+if not hasattr(ast, 'Str'):
+    class _AstStr:
+        @classmethod
+        def __instancecheck__(cls, node):
+            return isinstance(node, ast.Constant) and isinstance(node.value, str)
+    ast.Str = _AstStr()
+
+if not hasattr(ast, 'Num'):
+    class _AstNum:
+        @classmethod
+        def __instancecheck__(cls, node):
+            return isinstance(node, ast.Constant) and isinstance(node.value, (int, float))
+    ast.Num = _AstNum()
+
+if not hasattr(ast, 'Bytes'):
+    class _AstBytes:
+        @classmethod
+        def __instancecheck__(cls, node):
+            return isinstance(node, ast.Constant) and isinstance(node.value, bytes)
+    ast.Bytes = _AstBytes()
+
+# ── Дальше без изменений ──────────────────────────────────────
 import django
 import pytest
+from django.conf import settings
 
-@pytest.fixture
-def user(db):
-    from django.contrib.auth.models import User
-    return User.objects.create_user(username='testuser', password='pass')
 
-@pytest.fixture
-def student(db, user):
-    from practikum.models import Student
-    return Student.objects.create(user=user, first_name='Иван', last_name='Иванов')
+def pytest_configure():
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+
+# ... остальные фикстуры без изменений
+
