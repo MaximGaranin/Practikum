@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'practikum.apps.PractikumConfig',
     'ckeditor',
     'editor.apps.EditorConfig',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [

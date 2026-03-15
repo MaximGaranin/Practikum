@@ -1,7 +1,11 @@
-{% extends "base.html" %} {% load static %} {% block link %}
-<link rel="stylesheet" href='{% static "css/profile.css" %}' />
-{% endblock %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
 
+{% block link %}
+<link rel="stylesheet" href='{% static "css/profile.css" %}' />
+{% endblock %}
+
+{% block content %}
 <div class="profile-container">
     <div class="profile-box">
 
@@ -12,16 +16,25 @@
                 ← Назад в профиль
             </a>
             <h2 class="username" style="margin-top:8px;">{{ contest.title }}</h2>
-            <div style="display:flex;gap:16px;margin-top:8px;">
-                <span style="font-size:13px;color:#666;">
-                    🕐 Начало: {{ contest.start_time|date:"d.m.Y H:i" }}
+            <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
+                <span style="font-size:13px;color:#666;">🕐 Начало: {{ contest.start_time|date:"d.m.Y H:i" }}</span>
+                <span style="font-size:13px;color:#666;">🏁 Конец: {{ contest.end_time|date:"d.m.Y H:i" }}</span>
+                <span style="font-size:13px;color:#56d364;">📋 Задач: {{ tasks.count }}</span>
+            </div>
+
+            <!-- Статус соревнования + кнопка "Участвовать" -->
+            <div style="margin-top:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                {% now "U" as now_ts %}
+                <span id="contestStatus" style="font-size:13px;padding:4px 12px;border-radius:20px;
+                    background:rgba(86,211,100,0.12);color:#56d364;border:1px solid rgba(86,211,100,0.3);">
+                    ● Идёт
                 </span>
-                <span style="font-size:13px;color:#666;">
-                    🏁 Конец: {{ contest.end_time|date:"d.m.Y H:i" }}
-                </span>
-                <span style="font-size:13px;color:#56d364;">
-                    📋 Задач: {{ tasks.count }}
-                </span>
+                <button id="registerBtn" onclick="registerForContest()"
+                    style="background:rgba(64,158,255,0.15);color:#409eff;border:1px solid rgba(64,158,255,0.3);
+                           font-size:13px;font-weight:600;padding:8px 20px;border-radius:8px;cursor:pointer;">
+                    🚀 Участвовать
+                </button>
+                <span id="registerStatus" style="font-size:12px;color:#555;"></span>
             </div>
         </div>
 
@@ -30,25 +43,59 @@
             <h3 class="section-title">Задачи</h3>
             {% if tasks %}
             {% for task in tasks %}
-            <div style="display:flex;justify-content:space-between;align-items:center;
-                background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
-                border-radius:10px;padding:14px 18px;margin-bottom:8px;">
-                <div>
-                    <div style="font-size:14px;font-weight:600;color:#e0e0e0;">
-                        {{ forloop.counter }}. {{ task.name }}
+            <div style="background:rgba(255,255,255,0.02);border:1px solid #2a2a2a;
+                        border-radius:10px;padding:14px 18px;margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <div style="font-size:14px;font-weight:600;color:#e0e0e0;">
+                            {{ forloop.counter }}. {{ task.name }}
+                        </div>
+                        {% if task.text_task %}
+                        <div style="font-size:12px;color:#666;margin-top:4px;">
+                            {{ task.text_task|truncatechars:100 }}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% if task.description %}
-                    <div style="font-size:12px;color:#666;margin-top:4px;">
-                        {{ task.description|truncatechars:80 }}
-                    </div>
-                    {% endif %}
+                    <button onclick="openTaskPanel({{ task.id }}, '{{ task.name|escapejs }}')"
+                        style="background:rgba(64,158,255,0.15);color:#409eff;font-size:12px;
+                               font-weight:600;padding:6px 14px;border-radius:6px;
+                               border:1px solid rgba(64,158,255,0.3);cursor:pointer;
+                               white-space:nowrap;margin-left:16px;">
+                        Решить
+                    </button>
                 </div>
-                <a href="#"
-                   style="background:rgba(64,158,255,0.15);color:#409eff;font-size:12px;
-                          font-weight:600;padding:6px 14px;border-radius:6px;
-                          text-decoration:none;white-space:nowrap;margin-left:16px;">
-                    Решить
-                </a>
+
+                <!-- Панель отправки решения — раскрывается по клику -->
+                <div id="taskPanel-{{ task.id }}"
+                     style="display:none;margin-top:14px;border-top:1px solid #2a2a2a;padding-top:14px;">
+                    <label style="font-size:12px;color:#aaa;display:block;margin-bottom:6px;">
+                        Ваш код (Python):
+                    </label>
+                    <textarea id="codeInput-{{ task.id }}"
+                        rows="8"
+                        style="width:100%;background:#1a1a1a;color:#e0e0e0;border:1px solid #393939;
+                               border-radius:8px;padding:10px;font-family:monospace;font-size:13px;
+                               resize:vertical;box-sizing:border-box;"
+                        placeholder="# Введите решение..."></textarea>
+                    <div style="display:flex;gap:10px;margin-top:10px;align-items:center;">
+                        <button onclick="submitSolution({{ contest.id }}, {{ task.id }})"
+                            style="background:rgba(86,211,100,0.15);color:#56d364;border:1px solid rgba(86,211,100,0.3);
+                                   font-size:13px;font-weight:600;padding:8px 20px;border-radius:8px;cursor:pointer;">
+                            ▶ Отправить
+                        </button>
+                        <button onclick="closeTaskPanel({{ task.id }})"
+                            style="background:transparent;color:#555;border:1px solid #333;
+                                   font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;">
+                            Отмена
+                        </button>
+                        <span id="submitStatus-{{ task.id }}" style="font-size:12px;color:#555;"></span>
+                    </div>
+                    <!-- Результат проверки -->
+                    <div id="submitResult-{{ task.id }}"
+                         style="display:none;margin-top:12px;padding:12px;border-radius:8px;
+                                background:#1a1a1a;border:1px solid #2a2a2a;font-size:13px;font-family:monospace;">
+                    </div>
+                </div>
             </div>
             {% endfor %}
             {% else %}
@@ -56,44 +103,211 @@
             {% endif %}
         </div>
 
-        <!-- Рейтинг -->
+        <!-- Рейтинг участников -->
         <div class="info-section" style="margin-top:24px;">
-            <h3 class="section-title">Рейтинг участников</h3>
-            {% if scores %}
-            {% for s in scores %}
-            <div style="display:flex;justify-content:space-between;align-items:center;
-                background:{% if forloop.counter == 1 %}rgba(255,215,0,0.06)
-                           {% elif forloop.counter == 2 %}rgba(192,192,192,0.06)
-                           {% elif forloop.counter == 3 %}rgba(205,127,50,0.06)
-                           {% else %}rgba(255,255,255,0.02){% endif %};
-                border:1px solid {% if forloop.counter == 1 %}rgba(255,215,0,0.2)
-                                  {% elif forloop.counter == 2 %}rgba(192,192,192,0.2)
-                                  {% elif forloop.counter == 3 %}rgba(205,127,50,0.2)
-                                  {% else %}#2a2a2a{% endif %};
-                border-radius:10px;padding:12px 18px;margin-bottom:6px;">
-                <div style="display:flex;align-items:center;gap:14px;">
-                    <span style="font-size:18px;font-weight:700;
-                        color:{% if forloop.counter == 1 %}#ffd700
-                              {% elif forloop.counter == 2 %}#c0c0c0
-                              {% elif forloop.counter == 3 %}#cd7f32
-                              {% else %}#555{% endif %};">
-                        #{{ forloop.counter }}
-                    </span>
-                    <span style="font-size:14px;color:#e0e0e0;">{{ s.user.username }}</span>
+            <h3 class="section-title">
+                Рейтинг участников
+                <button onclick="refreshLeaderboard()"
+                    style="background:transparent;border:none;color:#409eff;cursor:pointer;font-size:12px;margin-left:8px;">
+                    ↻ Обновить
+                </button>
+            </h3>
+            <div id="leaderboardBlock">
+                {% if scores %}
+                {% for s in scores %}
+                <div style="display:flex;justify-content:space-between;align-items:center;
+                    background:{% if forloop.counter == 1 %}rgba(255,215,0,0.06)
+                               {% elif forloop.counter == 2 %}rgba(192,192,192,0.06)
+                               {% elif forloop.counter == 3 %}rgba(205,127,50,0.06)
+                               {% else %}rgba(255,255,255,0.02){% endif %};
+                    border:1px solid {% if forloop.counter == 1 %}rgba(255,215,0,0.2)
+                                      {% elif forloop.counter == 2 %}rgba(192,192,192,0.2)
+                                      {% elif forloop.counter == 3 %}rgba(205,127,50,0.2)
+                                      {% else %}#2a2a2a{% endif %};
+                    border-radius:10px;padding:12px 18px;margin-bottom:6px;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <span style="font-size:18px;font-weight:700;
+                            color:{% if forloop.counter == 1 %}#ffd700
+                                  {% elif forloop.counter == 2 %}#c0c0c0
+                                  {% elif forloop.counter == 3 %}#cd7f32
+                                  {% else %}#555{% endif %};">
+                            #{{ forloop.counter }}
+                        </span>
+                        <span style="font-size:14px;color:#e0e0e0;">{{ s.user.username }}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:16px;font-weight:700;color:#56d364;">{{ s.score }}</div>
+                        <div style="font-size:11px;color:#555;">{{ s.solved }} решено</div>
+                    </div>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-size:16px;font-weight:700;color:#56d364;">{{ s.score }}</div>
-                    <div style="font-size:11px;color:#555;">очков</div>
-                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color:#666;font-size:13px;" id="noParticipants">Участников пока нет.</p>
+                {% endif %}
             </div>
-            {% endfor %}
-            {% else %}
-            <p style="color:#666;font-size:13px;">Участников пока нет.</p>
-            {% endif %}
         </div>
 
     </div>
 </div>
+
+<script>
+const CONTEST_ID = {{ contest.id }};
+const API_BASE = '/api/contests/' + CONTEST_ID;
+
+// Получаем JWT из localStorage (если есть) или используем CSRF для сессионной авторизации
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    } else {
+        headers['X-CSRFToken'] = getCookie('csrftoken');
+    }
+    return headers;
+}
+
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : '';
+}
+
+// ── Участвовать ─────────────────────────────────────────────
+async function registerForContest() {
+    const btn = document.getElementById('registerBtn');
+    const status = document.getElementById('registerStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ Регистрация...';
+
+    try {
+        const res = await fetch(API_BASE + '/register/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            btn.textContent = '✅ Вы участник';
+            btn.style.color = '#56d364';
+            btn.style.borderColor = 'rgba(86,211,100,0.3)';
+            status.textContent = data.message || '';
+        } else {
+            btn.disabled = false;
+            btn.textContent = '🚀 Участвовать';
+            status.style.color = '#ff7675';
+            status.textContent = data.error || data.message || 'Ошибка';
+        }
+    } catch (e) {
+        btn.disabled = false;
+        btn.textContent = '🚀 Участвовать';
+        status.style.color = '#ff7675';
+        status.textContent = 'Ошибка сети';
+    }
+}
+
+// ── Панель задачи ────────────────────────────────────────────
+function openTaskPanel(taskId, taskName) {
+    // Закрываем остальные открытые панели
+    document.querySelectorAll('[id^="taskPanel-"]').forEach(p => p.style.display = 'none');
+    document.getElementById('taskPanel-' + taskId).style.display = 'block';
+}
+
+function closeTaskPanel(taskId) {
+    document.getElementById('taskPanel-' + taskId).style.display = 'none';
+    document.getElementById('submitResult-' + taskId).style.display = 'none';
+}
+
+// ── Отправить решение ────────────────────────────────────────
+async function submitSolution(contestId, taskId) {
+    const code = document.getElementById('codeInput-' + taskId).value.trim();
+    const statusEl = document.getElementById('submitStatus-' + taskId);
+    const resultEl = document.getElementById('submitResult-' + taskId);
+
+    if (!code) {
+        statusEl.style.color = '#ff7675';
+        statusEl.textContent = 'Введите код';
+        return;
+    }
+
+    statusEl.style.color = '#aaa';
+    statusEl.textContent = '⏳ Проверяем...';
+    resultEl.style.display = 'none';
+
+    try {
+        const res = await fetch(API_BASE + '/submit/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ task_id: taskId, code: code }),
+        });
+        const data = await res.json();
+
+        resultEl.style.display = 'block';
+
+        if (data.status === 'accepted') {
+            statusEl.style.color = '#56d364';
+            statusEl.textContent = '✅ Принято!';
+            resultEl.style.borderColor = 'rgba(86,211,100,0.3)';
+            resultEl.style.color = '#56d364';
+            resultEl.textContent =
+                `✅ Принято! Пройдено тестов: ${data.passed} / ${data.total}`;
+            // Обновляем рейтинг
+            setTimeout(refreshLeaderboard, 800);
+        } else if (data.status === 'wrong_answer') {
+            statusEl.style.color = '#f0c040';
+            statusEl.textContent = '❌ Неверный ответ';
+            resultEl.style.borderColor = 'rgba(240,192,64,0.3)';
+            resultEl.style.color = '#f0c040';
+            resultEl.textContent =
+                `❌ Неверный ответ. Пройдено: ${data.passed} / ${data.total}`;
+        } else {
+            statusEl.style.color = '#ff7675';
+            statusEl.textContent = '💥 Ошибка';
+            resultEl.style.borderColor = 'rgba(255,118,117,0.3)';
+            resultEl.style.color = '#ff7675';
+            resultEl.textContent = data.error || `Ошибка выполнения (${data.status})`;
+        }
+    } catch (e) {
+        statusEl.style.color = '#ff7675';
+        statusEl.textContent = 'Ошибка сети';
+    }
+}
+
+// ── Обновить рейтинг (AJAX) ──────────────────────────────────
+async function refreshLeaderboard() {
+    try {
+        const res = await fetch(API_BASE + '/leaderboard/');
+        const scores = await res.json();
+        const block = document.getElementById('leaderboardBlock');
+
+        if (!scores.length) {
+            block.innerHTML = '<p style="color:#666;font-size:13px;">Участников пока нет.</p>';
+            return;
+        }
+
+        const medals = ['#ffd700', '#c0c0c0', '#cd7f32'];
+        const bgColors = ['rgba(255,215,0,0.06)', 'rgba(192,192,192,0.06)', 'rgba(205,127,50,0.06)'];
+        const borderColors = ['rgba(255,215,0,0.2)', 'rgba(192,192,192,0.2)', 'rgba(205,127,50,0.2)'];
+
+        block.innerHTML = scores.map((s, i) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                background:${bgColors[i] || 'rgba(255,255,255,0.02)'};
+                border:1px solid ${borderColors[i] || '#2a2a2a'};
+                border-radius:10px;padding:12px 18px;margin-bottom:6px;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <span style="font-size:18px;font-weight:700;
+                        color:${medals[i] || '#555'};">#${i + 1}</span>
+                    <span style="font-size:14px;color:#e0e0e0;">${s.username}</span>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:16px;font-weight:700;color:#56d364;">${s.score}</div>
+                    <div style="font-size:11px;color:#555;">${s.solved} решено</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Ошибка обновления рейтинга:', e);
+    }
+}
+</script>
 
 {% endblock %}
 

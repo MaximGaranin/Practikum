@@ -1,6 +1,31 @@
 import ast
 import re
 from typing import Dict, List, Tuple
+import sys
+
+# ── Совместимость Python 3.12+ ─────────────────────────────────
+if sys.version_info >= (3, 12):
+    # Создаём заглушки чтобы старый код не падал
+    if not hasattr(ast, 'Str'):
+        class _AstStr:
+            @classmethod
+            def __instancecheck__(cls, node):
+                return isinstance(node, ast.Constant) and isinstance(node.value, str)
+        ast.Str = _AstStr()
+
+    if not hasattr(ast, 'Num'):
+        class _AstNum:
+            @classmethod
+            def __instancecheck__(cls, node):
+                return isinstance(node, ast.Constant) and isinstance(node.value, (int, float))
+        ast.Num = _AstNum()
+
+    if not hasattr(ast, 'Bytes'):
+        class _AstBytes:
+            @classmethod
+            def __instancecheck__(cls, node):
+                return isinstance(node, ast.Constant) and isinstance(node.value, bytes)
+        ast.Bytes = _AstBytes()
 
 class CodeAnalyzer:
     """Анализирует Python код и определяет оптимальный способ выполнения"""
@@ -189,12 +214,15 @@ class CodeVisitor(ast.NodeVisitor):
         if isinstance(node.func, ast.Name):
             if node.func.id in ['open', 'file']:
                 self.has_file_operations = True
-        
-        # Проверка системных вызовов
+            # eval/exec/import как функция — тоже системный вызов
+            if node.func.id in ['eval', 'exec', '__import__']:
+                self.has_system_calls = True
+
+        # Проверка системных вызовов через атрибут (os.system, subprocess.popen и т.д.)
         if isinstance(node.func, ast.Attribute):
             if node.func.attr in ['system', 'popen', 'exec', 'eval']:
                 self.has_system_calls = True
-        
+
         self.generic_visit(node)
     
     def visit_For(self, node):
