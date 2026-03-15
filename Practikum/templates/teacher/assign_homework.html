@@ -73,6 +73,7 @@
                     <tr>
                         <th>Задание</th>
                         <th>Группа</th>
+                        <th>Прогресс сдачи</th>
                         <th>Дедлайн</th>
                         <th>Назначено</th>
                     </tr>
@@ -82,6 +83,42 @@
                     <tr>
                         <td><strong>{{ hw.task.name }}</strong></td>
                         <td>{{ hw.group.name }}</td>
+
+                        <!-- ↓ новая колонка прогресса -->
+                        <td style="min-width: 160px;">
+                            {% if hw.total_count > 0 %}
+                                {% with percent=hw.solved_count|floatformat:0 %}
+                                {# Django не умеет делить в шаблоне — считаем процент на бэке #}
+                                {% endwith %}
+                                <div style="
+                                    background: #2a2a2a;
+                                    border-radius: 6px;
+                                    height: 6px;
+                                    margin-bottom: 5px;
+                                    overflow: hidden;
+                                ">
+                                    <div style="
+                                        height: 100%;
+                                        width: {{ hw.solved_percent }}%;
+                                        background: {% if hw.solved_percent == 100 %}#32B8C6{% elif hw.solved_percent >= 50 %}#f0c040{% else %}#ff7675{% endif %};
+                                        border-radius: 6px;
+                                        transition: width 0.3s ease;
+                                    "></div>
+                                </div>
+                                <span style="font-size:12px;color:#aaa;">
+                                    {{ hw.solved_count }} / {{ hw.total_count }}
+                                    <span style="color:
+                                        {% if hw.solved_percent == 100 %}#32B8C6
+                                        {% elif hw.solved_percent >= 50 %}#f0c040
+                                        {% else %}#ff7675{% endif %};">
+                                        ({{ hw.solved_percent }}%)
+                                    </span>
+                                </span>
+                            {% else %}
+                                <span style="font-size:12px;color:#555;">Нет студентов</span>
+                            {% endif %}
+                        </td>
+
                         <td style="color:#ff7675;">{{ hw.deadline|date:"d M Y, H:i" }}</td>
                         <td style="color:#888;font-size:13px;">{{ hw.created_at|date:"d M Y" }}</td>
                     </tr>
@@ -96,3 +133,4 @@
 
 </div>
 {% endblock %}
+

@@ -399,9 +399,27 @@ sys.stderr = StringIO()
                 const result = await response.json();
 
                 if (result.success) {
-                    displayOutput(`✓ Успешно выполнено\n\n${result.output || '(Нет вывода)'}`, 'success');
+                    // Определяем режим из ответа сервера ('local' или 'docker')
+                    const isDocker = result.execution_mode === 'docker';
+                    const modeLabel = isDocker ? 'Docker (офлайн)' : 'Локально';
+                    const modeCss   = isDocker ? 'server' : 'client';
+                    const modeIcon  = isDocker ? '🐳' : '⚡';
+
+                    // Показываем сложность если сервер её вернул
+                    const scoreInfo = result.complexity_score !== undefined
+                        ? `\nСложность кода: ${result.complexity_score}`
+                        : '';
+                    const reasonInfo = result.reason
+                        ? `\nПричина: ${result.reason}`
+                        : '';
+
+                    displayOutput(
+                        `${modeIcon} Выполнено [${modeLabel}]${scoreInfo}${reasonInfo}\n\n${result.output || '(Нет вывода)'}`,
+                        'success'
+                    );
                     updateExecutionTime(result.execution_time);
-                    updateExecutionMode('Сервер', 'server');
+                    updateExecutionMode(modeLabel, modeCss);
+
                     if (checkResult) {
                         await checkTaskResult(code, result.output, result.analysis);
                     }
@@ -415,7 +433,6 @@ sys.stderr = StringIO()
                 updateExecutionMode('Ошибка', 'server');
             }
         }
-
         // ==================== ПРОВЕРКА РЕЗУЛЬТАТА ЗАДАНИЯ ====================
         async function checkTaskResult(code, output, analysis) {
             try {
