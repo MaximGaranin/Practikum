@@ -1,11 +1,17 @@
 import pytest
+import django
 from django.conf import settings
 
 
 def pytest_configure(config):
-    """Настройка Django для тестов."""
     import os
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Practikum.settings')
+    django.setup()
+    # Переключаем на SQLite in-memory — не нужен PostgreSQL
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
 
 
 @pytest.fixture
