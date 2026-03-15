@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.timezone import now
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q, Sum, Prefetch
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, login
@@ -23,6 +23,7 @@ from .checker import check_submission
 from django.utils.timezone import now as tz_now
 from .currency import reward_for_task, reward_for_achievement, reward_for_contest, get_or_create_wallet
 from .forms import AddStudentForm
+from datetime import date, timedelta
 
 User = get_user_model()
 
@@ -673,7 +674,6 @@ def teacher_student_detail(request, student_id):
 @teacher_required
 def teacher_assign_homework(request):
     """Назначить ДЗ группе."""
-    from .models import Homework, Notification
     teacher = request.user.teacher
 
     teacher_groups = CourseTeacherGroup.objects.filter(teacher=teacher).values_list('group', flat=True)
@@ -720,7 +720,16 @@ def teacher_assign_homework(request):
     homeworks = Homework.objects.filter(
         teacher=teacher
     ).select_related('group', 'task').order_by('-created_at')
-
+    # Статус сдачи по каждому ДЗ
+    for hw in homeworks:
+        students_in_group = hw.group.students.filter(user__isnull=False)
+        solved_user_ids = Submission.objects.filter(
+            task=hw.task,
+            status='accepted',
+            user__in=students_in_group.values_list('user', flat=True)
+        ).values_list('user_id', flat=True).distinct()
+        hw.solved_count = len(solved_user_ids)
+        hw.total_count = students_in_group.count()
     context = {
         'groups': groups,
         'tasks': tasks,
@@ -962,3 +971,52 @@ def teacher_course_edit(request, course_id):
         'action': 'Сохранить', 'course': course,
         'all_topics': topics, 'selected_topic_ids': selected_topic_ids
     })
+
+
+
+@login_required
+def leaderboard(request):
+    """Рейтинг студентов по монетам и решённым задачам."""
+
+    # Берём всех студентов, у которых есть user
+    students = Student.objects.filter(
+        user__isnull=False
+    ).select_related('user').prefetch_related(
+        Prefetch('user__wallet')
+    ).annotate(
+        solved_count=Count(
+            'user__submissions',
+            filter=Q(user__submissions__status='accepted'),
+            distinct=True
+        )
+    )
+
+    # Сортируем: сначала по балансу, потом по решённым задачам
+    def sort_key(s):
+        balance = s.user.wallet.balance if hasattr(s.user, 'wallet') else 0
+        return (-balance, -s.solved_count)
+
+    students_list = sorted(students, key=sort_key)
+
+    # Считаем стрик для каждого (упрощённо — из UserTaskProgress)
+    today = date.today()
+    for i, student in enumerate(students_list):
+        student.rank = i + 1
+        progress = UserTaskProgress.objects.filter(
+            user=student.user, is_completed=True
+        ).values_list('completed_at', flat=True)
+        activity = {p.strftime('%Y-%m-%d') for p in progress if p}
+        streak = 0
+        for d in range(365):
+            day = (today - timedelta(days=d)).strftime('%Y-%m-%d')
+            if day in activity:
+                streak += 1
+            else:
+                break
+        student.streak = streak
+        student.balance = student.user.wallet.balance if hasattr(student.user, 'wallet') else 0
+
+    return render(request, 'leaderboard/leaderboard.html', {
+        'students': students_list,
+    })
+

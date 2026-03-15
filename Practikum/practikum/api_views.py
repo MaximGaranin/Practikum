@@ -1,0 +1,135 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import serializers as drf_serializers
+from django.utils.timezone import now
+
+from .models import Contest, ContestScore
+from Logistic_Task.models import Task
+from practikum.checker import check_submission
+from practikum.currency import reward_for_contest
+
+
+# ── Сериализаторы ──────────────────────────────────────────────
+class ContestSerializer(drf_serializers.ModelSerializer):
+    tasks_count = drf_serializers.SerializerMethodField()
+    is_active = drf_serializers.SerializerMethodField()
+
+    class Meta:
+        model = Contest
+        fields = ['id', 'title', 'start_time', 'end_time', 'tasks_count', 'is_active']
+
+    def get_tasks_count(self, obj):
+        return obj.tasks.count()
+
+    def get_is_active(self, obj):
+        n = now()
+        return obj.start_time <= n <= obj.end_time
+
+
+class ContestScoreSerializer(drf_serializers.ModelSerializer):
+    username = drf_serializers.CharField(source='user.username')
+
+    class Meta:
+        model = ContestScore
+        fields = ['username', 'score', 'solved']
+
+
+# ── Views ──────────────────────────────────────────────────────
+class ContestListView(APIView):
+    """GET /api/contests/ — список всех соревнований"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        contests = Contest.objects.all().order_by('-start_time')
+        return Response(ContestSerializer(contests, many=True).data)
+
+
+class ContestDetailView(APIView):
+    """GET /api/contests/<id>/ — детали соревнования"""
+    permission_classes = [AllowAny]
+
+    def get(self, request, contest_id):
+        try:
+            contest = Contest.objects.prefetch_related('tasks').get(id=contest_id)
+        except Contest.DoesNotExist:
+            return Response({'error': 'Не найдено'}, status=404)
+        data = ContestSerializer(contest).data
+        data['tasks'] = list(contest.tasks.values('id', 'name'))
+        return Response(data)
+
+
+class ContestRegisterView(APIView):
+    """POST /api/contests/<id>/register/ — зарегистрироваться"""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, contest_id):
+        try:
+            contest = Contest.objects.get(id=contest_id)
+        except Contest.DoesNotExist:
+            return Response({'error': 'Не найдено'}, status=404)
+        score, created = ContestScore.objects.get_or_create(
+            contest=contest, user=request.user,
+            defaults={'score': 0, 'solved': 0}
+        )
+        if not created:
+            return Response({'message': 'Уже зарегистрированы'})
+        return Response({'message': 'Успешно зарегистрированы', 'score': 0})
+
+
+class ContestSubmitView(APIView):
+    """POST /api/contests/<id>/submit/ — отправить решение задачи"""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, contest_id):
+        try:
+            contest = Contest.objects.get(id=contest_id)
+        except Contest.DoesNotExist:
+            return Response({'error': 'Не найдено'}, status=404)
+
+        # Проверяем что соревнование активно
+        n = now()
+        if not (contest.start_time <= n <= contest.end_time):
+            return Response({'error': 'Соревнование не активно'}, status=400)
+
+        task_id = request.data.get('task_id')
+        code = request.data.get('code', '')
+        try:
+            task = contest.tasks.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({'error': 'Задача не найдена в соревновании'}, status=404)
+
+        # Проверяем код
+        test_cases = list(task.testcase_set.values('input', 'expected'))
+        result = check_submission(code, test_cases)
+
+        # Начисляем очки если принято
+        if result['status'] == 'accepted':
+            score_obj, _ = ContestScore.objects.get_or_create(
+                contest=contest, user=request.user,
+                defaults={'score': 0, 'solved': 0}
+            )
+            score_obj.score += 100
+            score_obj.solved += 1
+            score_obj.save()
+
+        return Response({
+            'status': result['status'],
+            'passed': result['passed'],
+            'total': result['total'],
+        })
+
+
+class ContestLeaderboardView(APIView):
+    """GET /api/contests/<id>/leaderboard/ — топ участников"""
+    permission_classes = [AllowAny]
+
+    def get(self, request, contest_id):
+        scores = ContestScore.objects.filter(
+            contest_id=contest_id
+        ).select_related('user').order_by('-score', '-solved')
+        return Response(ContestScoreSerializer(scores, many=True).data)

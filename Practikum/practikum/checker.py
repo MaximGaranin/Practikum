@@ -92,7 +92,8 @@ def check_submission(code: str, test_cases: list) -> dict:
     has_runtime_error = False
 
     for i, tc in enumerate(test_cases, start=1):
-        out = run_python(code, tc['input'])
+        runner = run_python_docker if is_complex_code(code) else run_python
+        out = runner(code, tc['input'])
         expected = tc['expected'].strip()
 
         if out['returncode'] != 0:
@@ -134,3 +135,28 @@ def check_submission(code: str, test_cases: list) -> dict:
         'results': results,
     }
 
+COMPLEXITY_THRESHOLD = 50
+
+def is_complex_code(code: str) -> bool:
+    """Сложный = много строк ИЛИ тяжёлые библиотеки."""
+    lines = [l for l in code.strip().splitlines() if l.strip()]
+    heavy = ['numpy', 'pandas', 'scipy', 'matplotlib', 'sklearn']
+    return len(lines) > COMPLEXITY_THRESHOLD or any(h in code for h in heavy)
+
+def run_python_docker(code: str, stdin: str, time_limit: int = 10) -> dict:
+    """Запуск кода в Docker-контейнере без сети (офлайн-режим)."""
+    import docker
+    client = docker.from_env()
+    try:
+        container = client.containers.run(
+            image='python:3.11-slim',
+            command=['python3', '-c', code],
+            network_disabled=True,
+            mem_limit='128m',
+            cpu_quota=50000,
+            remove=True,
+            stdout=True, stderr=True,
+        )
+        return {'stdout': container.decode().strip(), 'stderr': '', 'returncode': 0}
+    except Exception as e:
+        return {'stdout': '', 'stderr': str(e), 'returncode': -1}

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 app_name = 'prac'
 
@@ -14,6 +15,7 @@ urlpatterns = [
     path('api/notifications/', views.notifications, name='notifications'),
     path('api/notifications/read/', views.mark_notifications_read, name='notifications_read'),
     path('contest/<int:contest_id>/', views.contest_detail, name='contest_detail'),
+    path('leaderboard/',views.leaderboard, name='leaderboard'),
 
     # Маршруты для преподавателя
     path('teacher/', views.teacher_dashboard, name='teacher_dashboard'),
@@ -35,5 +37,12 @@ urlpatterns = [
     path('teacher/topics/<int:topic_id>/edit/', views.teacher_topic_edit, name='teacher_topic_edit'),
     path('teacher/topics/<int:topic_id>/delete/', views.teacher_topic_delete, name='teacher_topic_delete'),
     path('teacher/students/add/', views.teacher_add_student, name='teacher_add_student'),
+
+    # API
+    path('api/contests/', api_views.ContestListView.as_view(), name='contest_list'),
+    path('api/contests/<int:contest_id>/', api_views.ContestDetailView.as_view(), name='contest_detail_api'),
+    path('api/contests/<int:contest_id>/register/', api_views.ContestRegisterView.as_view(), name='contest_register'),
+    path('api/contests/<int:contest_id>/submit/', api_views.ContestSubmitView.as_view(), name='contest_submit'),
+    path('api/contests/<int:contest_id>/leaderboard/', api_views.ContestLeaderboardView.as_view(), name='contest_leaderboard'),
 ]
 
