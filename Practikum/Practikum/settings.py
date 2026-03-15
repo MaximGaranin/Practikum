@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-c@yv4)1#9m!9##_+&zvmd4^h@69(h!5c)#hh)r7b6%9c=&4)%3
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = TrueDEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
                         cast=lambda v: [s.strip() for s in v.split(',')])
@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
-MIDDLEWARE =[
+MIDDLEWARE = [
     'Practikum.middleware.DisableCSRFForAPI',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -130,6 +130,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
