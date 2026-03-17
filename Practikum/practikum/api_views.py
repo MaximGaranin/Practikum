@@ -39,7 +39,6 @@ class ContestScoreSerializer(drf_serializers.ModelSerializer):
 
 # ── Views ──────────────────────────────────────────────────────
 class ContestListView(APIView):
-    """GET /api/contests/ — список всех соревнований"""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -48,7 +47,6 @@ class ContestListView(APIView):
 
 
 class ContestDetailView(APIView):
-    """GET /api/contests/<id>/ — детали соревнования"""
     permission_classes = [AllowAny]
 
     def get(self, request, contest_id):
@@ -62,7 +60,6 @@ class ContestDetailView(APIView):
 
 
 class ContestRegisterView(APIView):
-    """POST /api/contests/<id>/register/ — зарегистрироваться"""
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -81,7 +78,6 @@ class ContestRegisterView(APIView):
 
 
 class ContestSubmitView(APIView):
-    """POST /api/contests/<id>/submit/ — отправить решение задачи"""
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -91,7 +87,6 @@ class ContestSubmitView(APIView):
         except Contest.DoesNotExist:
             return Response({'error': 'Не найдено'}, status=404)
 
-        # Проверяем что соревнование активно
         n = now()
         if not (contest.start_time <= n <= contest.end_time):
             return Response({'error': 'Соревнование не активно'}, status=400)
@@ -103,11 +98,15 @@ class ContestSubmitView(APIView):
         except Task.DoesNotExist:
             return Response({'error': 'Задача не найдена в соревновании'}, status=404)
 
-        # Проверяем код
-        test_cases = list(task.testcase_set.values('input', 'expected'))
-        result = check_submission(code, test_cases)
+        # Загружаем все тест-кейсы с флагом is_hidden
+        all_test_cases = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
+        test_cases_for_checker = [
+            {'input': tc['input'], 'expected': tc['expected']}
+            for tc in all_test_cases
+        ]
+        result = check_submission(code, test_cases_for_checker)
 
-        # Начисляем очки если принято
+        # В соревновании не раскрываем детали — только статус
         if result['status'] == 'accepted':
             score_obj, _ = ContestScore.objects.get_or_create(
                 contest=contest, user=request.user,
@@ -125,7 +124,6 @@ class ContestSubmitView(APIView):
 
 
 class ContestLeaderboardView(APIView):
-    """GET /api/contests/<id>/leaderboard/ — топ участников"""
     permission_classes = [AllowAny]
 
     def get(self, request, contest_id):

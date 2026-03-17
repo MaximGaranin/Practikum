@@ -29,7 +29,6 @@ User = get_user_model()
 
 @login_required
 def notifications(request):
-    """Получить уведомления пользователя"""
     from .models import Notification
     notifs = Notification.objects.filter(user=request.user, is_read=False)[:10]
     data = [{'id': n.id, 'text': n.text, 'created_at': n.created_at.strftime('%d.%m %H:%M')} for n in notifs]
@@ -37,14 +36,12 @@ def notifications(request):
 
 @login_required  
 def mark_notifications_read(request):
-    """Пометить все как прочитанные"""
     from .models import Notification
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return JsonResponse({'success': True})
 
 
 def course(request):
-    # Если преподаватель — редирект на дашборд
     if request.user.is_authenticated:
         try:
             _ = request.user.teacher
@@ -54,7 +51,6 @@ def course(request):
 
     all_courses = Course.objects.all()
 
-    # Проверяем — состоит ли пользователь в группе
     in_group = False
     if request.user.is_authenticated:
         try:
@@ -65,7 +61,6 @@ def course(request):
 
     courses_data = []
     for c in all_courses:
-        # Если не в группе — доступен только "Базовый курс"
         is_locked = not in_group and c.name != 'Базовый курс'
 
         progress_percent = 0
@@ -111,7 +106,7 @@ def _check_and_grant_achievements(user, total_solved, streak):
             _, created = UserAchievement.objects.get_or_create(
                 user=user, achievement=ach
             )
-            if created:  # начисляем только за новые ачивки
+            if created:
                 reward_for_achievement(user, ach.name)
 
 
@@ -144,7 +139,6 @@ def profile(request, username=None):
         student.phone_number = request.POST.get('phone_number', '').strip()
         student.save()
 
-    # ===== ТЕПЛОВАЯ КАРТА =====
     one_year_ago = now() - timedelta(days=365)
     completions = UserTaskProgress.objects.filter(
         user=profile,
@@ -157,7 +151,6 @@ def profile(request, username=None):
         day_str = dt.strftime('%Y-%m-%d')
         activity_map[day_str] = activity_map.get(day_str, 0) + 1
 
-    # ===== ОБЩАЯ СТАТИСТИКА =====
     total_solved = UserTaskProgress.objects.filter(user=profile, is_completed=True).count()
     total_attempts = UserTaskProgress.objects.filter(user=profile).aggregate(
         total=Sum('attempts')
@@ -173,7 +166,6 @@ def profile(request, username=None):
         else:
             break
 
-    # ===== ДОСТИЖЕНИЯ =====
     all_achievements = Achievement.objects.all()
     unlocked_ids = set(
         UserAchievement.objects.filter(user=profile).values_list('achievement_id', flat=True)
@@ -188,11 +180,9 @@ def profile(request, username=None):
         for ach in all_achievements
     ]
 
-    # Выдаём новые ачивки (если смотришь свой профиль)
     if request.user == profile:
         _check_and_grant_achievements(profile, total_solved, streak)
 
-    # ===== СОРЕВНОВАНИЯ =====
     current_time = now()
     active_contests = Contest.objects.filter(
         start_time__lte=current_time,
@@ -203,7 +193,6 @@ def profile(request, username=None):
         end_time__lt=current_time
     ).prefetch_related('tasks').order_by('-end_time')[:5]
 
-    # Добавляем место пользователя в прошедших соревнованиях
     past_contests_with_rank = []
     for contest in past_contests:
         scores = list(
@@ -216,7 +205,6 @@ def profile(request, username=None):
                 break
         past_contests_with_rank.append({'contest': contest, 'rank': rank})
 
-    # ===== КОД-РЕВЬЮ =====
     reviews = (
         CodeReview.objects
         .filter(submission__user=profile)
@@ -237,12 +225,9 @@ def profile(request, username=None):
         'total_attempts': total_attempts,
         'courses_count': courses_count,
         'streak': streak,
-        # Достижения
         'achievements': achievements,
-        # Соревнования
         'active_contests': active_contests,
         'past_contests_with_rank': past_contests_with_rank,
-        # Ревью
         'reviews': reviews,
         'wallet': wallet,
         'transactions': transactions,
@@ -261,22 +246,44 @@ def submit_solution(request, task_id):
 
     task = get_object_or_404(Task, id=task_id)
     code = request.POST.get('code', '')
-    test_cases = list(task.testcase_set.values('input', 'expected'))
-    result = check_submission(code, test_cases)
+
+    # Загружаем все тест-кейсы с флагом is_hidden
+    all_test_cases = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
+
+    # Для проверки используем ВСЕ тест-кейсы (включая скрытые)
+    test_cases_for_checker = [
+        {'input': tc['input'], 'expected': tc['expected']}
+        for tc in all_test_cases
+    ]
+    result = check_submission(code, test_cases_for_checker)
+
+    # Для ответа студенту — скрываем input/expected скрытых тест-кейсов
+    safe_results = []
+    for i, (res, tc) in enumerate(zip(result.get('results', []), all_test_cases)):
+        if tc['is_hidden']:
+            safe_results.append({
+                'test': res['test'],
+                'passed': res['passed'],
+                'expected': '*** скрыто ***',
+                'got': res['got'] if not res['passed'] else '*** скрыто ***',
+                'error': res.get('error', ''),
+                'is_hidden': True,
+            })
+        else:
+            safe_results.append({**res, 'is_hidden': False})
 
     # Считаем попытки до этого
     previous_attempts = Submission.objects.filter(
         user=request.user, task=task
     ).count()
 
-    sub = Submission.objects.create(
+    Submission.objects.create(
         user=request.user,
         task=task,
         code=code,
         status=result['status'],
     )
 
-    # Начисляем монеты только если решено верно
     if result['status'] == 'accepted':
         is_first_try = previous_attempts == 0
         reward_for_task(request.user, task.name, is_first_try=is_first_try)
@@ -285,13 +292,16 @@ def submit_solution(request, task_id):
         ).count()
         _check_and_grant_achievements(request.user, total_solved, 0)
 
-    return JsonResponse(result)
-
+    return JsonResponse({
+        'status': result['status'],
+        'passed': result['passed'],
+        'total': result['total'],
+        'results': safe_results,
+    })
 
 
 @login_required
 def task(request):
-    """Страница задач — ДЗ (в группе) или личные задачи (не в группе)."""
     try:
         student = request.user.student
         enrollment = Enrollment.objects.filter(student=student).first()
@@ -302,7 +312,6 @@ def task(request):
     in_group = enrollment is not None
 
     if in_group:
-        # === СТУДЕНТ В ГРУППЕ: показываем ДЗ от преподавателя ===
         homeworks = Homework.objects.filter(
             group=enrollment.group
         ).select_related('task', 'teacher').order_by('deadline')
@@ -340,7 +349,6 @@ def task(request):
         }
 
     else:
-        # === СТУДЕНТ НЕ В ГРУППЕ: личные задачи ===
         if request.method == 'POST':
             action = request.POST.get('action')
             if action == 'create':
@@ -364,7 +372,6 @@ def task(request):
                         description=description,
                         deadline=deadline
                     )
-                    # Уведомление о новой задаче
                     Notification.objects.create(
                         user=request.user,
                         text=f'📝 Новая задача добавлена: «{pt.title}»'
@@ -407,7 +414,6 @@ def settings(request):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        # Смена пароля
         if action == 'change_password':
             form = PasswordChangeForm(user, request.POST)
             if form.is_valid():
@@ -419,7 +425,6 @@ def settings(request):
                     [e for errors in form.errors.values() for e in errors]
                 )
 
-        # Удаление аккаунта
         elif action == 'delete_account':
             confirm = request.POST.get('confirm_delete')
             if confirm == 'DELETE':
@@ -439,8 +444,6 @@ def settings(request):
 
 
 class RegisterView(CreateView):
-    """Регистрация пользователя."""
-
     form_class = UserCreationForm
     template_name = 'registration/registration_form.html'
     success_url = reverse_lazy('prac:course')
@@ -453,7 +456,6 @@ class RegisterView(CreateView):
 
 @login_required
 def edit_profile(request, username):
-    """Редактирование профиля."""
     user = get_object_or_404(User, username=username)
 
     if request.user != user:
@@ -482,43 +484,30 @@ def contest_detail(request, contest_id):
 
 @teacher_required
 def teacher_dashboard(request):
-    """Главная панель преподавателя."""
-    
-    # Получаем текущего преподавателя
     teacher = request.user.teacher
-    
-    # Получаем все назначения этого преподавателя
     teacher_assignments = CourseTeacherGroup.objects.filter(teacher=teacher)
-    
-    # ID групп, курсов преподавателя
     teacher_groups = teacher_assignments.values_list('group', flat=True)
     teacher_courses = teacher_assignments.values_list('course', flat=True)
-    
-    # Статистика только по группам преподавателя
+
     total_students = Student.objects.filter(
         enrollment__group__id__in=teacher_groups
     ).distinct().count()
-    
     total_courses = Course.objects.filter(id__in=teacher_courses).count()
     total_groups = Group.objects.filter(id__in=teacher_groups).count()
-    
-    # Задания из курсов преподавателя
     total_tasks = Task.objects.filter(
         topic__course__id__in=teacher_courses
     ).distinct().count()
-    
-    # Последние студенты из групп преподавателя
+
     recent_students = Student.objects.filter(
         enrollment__group__id__in=teacher_groups
     ).distinct().select_related('user').order_by('-id')[:5]
-    
-    # Курсы преподавателя с количеством студентов
+
     courses_stats = Course.objects.filter(
         id__in=teacher_courses
     ).annotate(
         students_count=Count('students', distinct=True)
     ).order_by('-students_count')[:5]
-    
+
     context = {
         'total_students': total_students,
         'total_courses': total_courses,
@@ -528,28 +517,21 @@ def teacher_dashboard(request):
         'courses_stats': courses_stats,
         'teacher': teacher,
     }
-    
     return render(request, 'teacher/dashboard.html', context)
 
 
 @teacher_required
 def teacher_students(request):
-    """Управление студентами преподавателя."""
     teacher = request.user.teacher
-    
-    # Группы преподавателя
     teacher_groups = CourseTeacherGroup.objects.filter(
         teacher=teacher
     ).values_list('group', flat=True)
-    
-    # Поиск
+
     search_query = request.GET.get('search', '')
-    
-    # Только студенты из групп преподавателя
     students_list = Student.objects.filter(
         enrollment__group__id__in=teacher_groups
     ).distinct().select_related('user')
-    
+
     if search_query:
         students_list = students_list.filter(
             Q(first_name__icontains=search_query) |
@@ -557,125 +539,93 @@ def teacher_students(request):
             Q(user__username__icontains=search_query) |
             Q(user__email__icontains=search_query)
         )
-    
-    # Пагинация
+
     paginator = Paginator(students_list, 20)
     page_number = request.GET.get('page', 1)
     students = paginator.get_page(page_number)
-    
+
     context = {
         'students': students,
         'search_query': search_query,
         'teacher': teacher,
     }
-    
     return render(request, 'teacher/students.html', context)
 
 
 @teacher_required
 def teacher_courses(request):
-    """Управление курсами преподавателя."""
     teacher = request.user.teacher
-    
-    # Курсы преподавателя
     teacher_courses_ids = CourseTeacherGroup.objects.filter(
         teacher=teacher
     ).values_list('course', flat=True).distinct()
-    
+
     courses = Course.objects.filter(
         id__in=teacher_courses_ids
     ).annotate(
         students_count=Count('students', distinct=True),
         topics_count=Count('topics', distinct=True)
     )
-    
-    context = {
-        'courses': courses,
-        'teacher': teacher,
-    }
-    
+
+    context = {'courses': courses, 'teacher': teacher}
     return render(request, 'teacher/courses.html', context)
 
 
 @teacher_required
 def teacher_tasks(request):
-    """Управление заданиями из курсов преподавателя."""
     from Logistic_Task.models import Course, Topic, Task
-    
     teacher = request.user.teacher
-    
-    # Курсы преподавателя
     teacher_courses_ids = CourseTeacherGroup.objects.filter(
         teacher=teacher
     ).values_list('course', flat=True).distinct()
-    
-    # Задания только из курсов преподавателя
+
     tasks = Task.objects.filter(
         topic__course__id__in=teacher_courses_ids
     ).distinct()
-    
-    # Темы из курсов преподавателя
+
     topics = Topic.objects.filter(
         course__id__in=teacher_courses_ids
-    ).annotate(
-        tasks_count=Count('tasks')
-    ).distinct()
-    
-    context = {
-        'tasks': tasks,
-        'topics': topics,
-        'teacher': teacher,
-    }
-    
+    ).annotate(tasks_count=Count('tasks')).distinct()
+
+    context = {'tasks': tasks, 'topics': topics, 'teacher': teacher}
     return render(request, 'teacher/tasks.html', context)
 
 
 @teacher_required
 def teacher_student_detail(request, student_id):
-    """Детальная информация о студенте (только из групп преподавателя)."""
     teacher = request.user.teacher
-    
-    # Группы преподавателя
     teacher_groups = CourseTeacherGroup.objects.filter(
         teacher=teacher
     ).values_list('group', flat=True)
-    
-    # Студент должен быть в группах преподавателя
+
     student = get_object_or_404(
         Student,
         id=student_id,
         enrollment__group__id__in=teacher_groups
     )
-    
+
     enrollments = Enrollment.objects.filter(
         student=student,
         group__id__in=teacher_groups
     ).select_related('group')
-    
-    # Курсы преподавателя, на которые записан студент
+
     teacher_courses_ids = CourseTeacherGroup.objects.filter(
         teacher=teacher
     ).values_list('course', flat=True)
-    
-    courses = student.user.enrolled_courses.filter(
-        id__in=teacher_courses_ids
-    )
-    
+
+    courses = student.user.enrolled_courses.filter(id__in=teacher_courses_ids)
+
     context = {
         'student': student,
         'enrollments': enrollments,
         'courses': courses,
         'teacher': teacher,
     }
-    
     return render(request, 'teacher/student_detail.html', context)
 
 
 @teacher_required
 def teacher_assign_homework(request):
-    """Назначить ДЗ группе."""
     teacher = request.user.teacher
-
     teacher_groups = CourseTeacherGroup.objects.filter(teacher=teacher).values_list('group', flat=True)
     teacher_courses_ids = CourseTeacherGroup.objects.filter(teacher=teacher).values_list('course', flat=True).distinct()
 
@@ -701,7 +651,6 @@ def teacher_assign_homework(request):
                 defaults={'teacher': teacher, 'deadline': deadline}
             )
             if created:
-                # Уведомляем всех студентов группы
                 for student in group.students.all():
                     if student.user:
                         Notification.objects.create(
@@ -716,11 +665,9 @@ def teacher_assign_homework(request):
 
         return redirect('prac:teacher_assign_homework')
 
-    # Текущие ДЗ
     homeworks = Homework.objects.filter(
         teacher=teacher
     ).select_related('group', 'task').order_by('-created_at')
-    # Статус сдачи по каждому ДЗ
     for hw in homeworks:
         students_in_group = hw.group.students.filter(user__isnull=False)
         solved_user_ids = Submission.objects.filter(
@@ -730,6 +677,7 @@ def teacher_assign_homework(request):
         ).values_list('user_id', flat=True).distinct()
         hw.solved_count = len(solved_user_ids)
         hw.total_count = students_in_group.count()
+
     context = {
         'groups': groups,
         'tasks': tasks,
@@ -739,27 +687,45 @@ def teacher_assign_homework(request):
     return render(request, 'teacher/assign_homework.html', context)
 
 
-# ===== КУРСЫ =====
 @teacher_required
 def teacher_course_create(request):
+    from Logistic_Task.models import Topic
+    topics = Topic.objects.all().order_by('name')
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
+        selected_topics = request.POST.getlist('topics')
         if name:
-            Course.objects.create(name=name)
+            course = Course.objects.create(name=name)
+            if selected_topics:
+                course.topics.set(selected_topics)
             return redirect('prac:teacher_courses')
-    return render(request, 'teacher/course_form.html', {'action': 'Создать', 'course': None})
+
+    return render(request, 'teacher/course_form.html', {
+        'action': 'Создать', 'course': None, 'all_topics': topics, 'selected_topic_ids': []
+    })
 
 
 @teacher_required
 def teacher_course_edit(request, course_id):
+    from Logistic_Task.models import Topic
     course = get_object_or_404(Course, id=course_id)
+    topics = Topic.objects.all().order_by('name')
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
+        selected_topics = request.POST.getlist('topics')
         if name:
             course.name = name
             course.save()
+            course.topics.set(selected_topics)
             return redirect('prac:teacher_courses')
-    return render(request, 'teacher/course_form.html', {'action': 'Сохранить', 'course': course})
+
+    selected_topic_ids = list(course.topics.values_list('id', flat=True))
+    return render(request, 'teacher/course_form.html', {
+        'action': 'Сохранить', 'course': course,
+        'all_topics': topics, 'selected_topic_ids': selected_topic_ids
+    })
 
 
 @teacher_required
@@ -774,7 +740,6 @@ def teacher_course_delete(request, course_id):
     })
 
 
-# ===== ЗАДАНИЯ =====
 @teacher_required
 def teacher_task_create(request):
     teacher = request.user.teacher
@@ -799,9 +764,7 @@ def teacher_task_create(request):
             return redirect('prac:teacher_tasks')
 
     return render(request, 'teacher/task_form.html', {
-        'action': 'Создать',
-        'task': None,
-        'topics': topics,
+        'action': 'Создать', 'task': None, 'topics': topics,
     })
 
 
@@ -825,10 +788,10 @@ def teacher_task_edit(request, task_id):
             return redirect('prac:teacher_tasks')
 
     return render(request, 'teacher/task_form.html', {
-        'action': 'Сохранить',
-        'task': task_obj,
-        'topics': topics,
+        'action': 'Сохранить', 'task': task_obj, 'topics': topics,
     })
+
+
 @teacher_required
 def teacher_task_delete(request, task_id):
     task_obj = get_object_or_404(Task, id=task_id)
@@ -841,7 +804,6 @@ def teacher_task_delete(request, task_id):
     })
 
 
-# ===== ТЕМЫ =====
 @teacher_required
 def teacher_topic_create(request):
     teacher = request.user.teacher
@@ -904,8 +866,8 @@ def teacher_add_student(request):
     )
 
     form = AddStudentForm(
-    request.POST or None,
-    group_queryset=teacher_groups
+        request.POST or None,
+        group_queryset=teacher_groups
     )
 
     if request.method == 'POST' and form.is_valid():
@@ -932,53 +894,8 @@ def teacher_add_student(request):
     })
 
 
-@teacher_required
-def teacher_course_create(request):
-    from Logistic_Task.models import Topic
-    topics = Topic.objects.all().order_by('name')
-    
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        selected_topics = request.POST.getlist('topics')
-        if name:
-            course = Course.objects.create(name=name)
-            if selected_topics:
-                course.topics.set(selected_topics)
-            return redirect('prac:teacher_courses')
-    
-    return render(request, 'teacher/course_form.html', {
-        'action': 'Создать', 'course': None, 'all_topics': topics, 'selected_topic_ids': []
-    })
-
-
-@teacher_required
-def teacher_course_edit(request, course_id):
-    from Logistic_Task.models import Topic
-    course = get_object_or_404(Course, id=course_id)
-    topics = Topic.objects.all().order_by('name')
-    
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        selected_topics = request.POST.getlist('topics')
-        if name:
-            course.name = name
-            course.save()
-            course.topics.set(selected_topics)
-            return redirect('prac:teacher_courses')
-    
-    selected_topic_ids = list(course.topics.values_list('id', flat=True))
-    return render(request, 'teacher/course_form.html', {
-        'action': 'Сохранить', 'course': course,
-        'all_topics': topics, 'selected_topic_ids': selected_topic_ids
-    })
-
-
-
 @login_required
 def leaderboard(request):
-    """Рейтинг студентов по монетам и решённым задачам."""
-
-    # Берём всех студентов, у которых есть user
     students = Student.objects.filter(
         user__isnull=False
     ).select_related('user').prefetch_related(
@@ -991,14 +908,12 @@ def leaderboard(request):
         )
     )
 
-    # Сортируем: сначала по балансу, потом по решённым задачам
     def sort_key(s):
         balance = s.user.wallet.balance if hasattr(s.user, 'wallet') else 0
         return (-balance, -s.solved_count)
 
     students_list = sorted(students, key=sort_key)
 
-    # Считаем стрик для каждого (упрощённо — из UserTaskProgress)
     today = date.today()
     for i, student in enumerate(students_list):
         student.rank = i + 1
@@ -1019,4 +934,3 @@ def leaderboard(request):
     return render(request, 'leaderboard/leaderboard.html', {
         'students': students_list,
     })
-
