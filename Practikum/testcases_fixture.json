@@ -1,0 +1,442 @@
+[
+  {
+    "model": "practikum.testcase",
+    "pk": 1,
+    "fields": {
+      "task": 1,
+      "input": "Максим",
+      "expected": "Привет, Максим! Добро пожаловать в курс Python.",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 2,
+    "fields": {
+      "task": 1,
+      "input": "Анна",
+      "expected": "Привет, Анна! Добро пожаловать в курс Python.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 3,
+    "fields": {
+      "task": 1,
+      "input": "Иван",
+      "expected": "Привет, Иван! Добро пожаловать в курс Python.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 4,
+    "fields": {
+      "task": 2,
+      "input": "",
+      "expected": "Меня зовут Максим, мне 25 лет, я живу в Москве.",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 5,
+    "fields": {
+      "task": 3,
+      "input": "10\n3",
+      "expected": "10 + 3 = 13\n10 - 3 = 7\n10 * 3 = 30\n10 / 3 = 3.33",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 6,
+    "fields": {
+      "task": 3,
+      "input": "6\n2",
+      "expected": "6 + 2 = 8\n6 - 2 = 4\n6 * 2 = 12\n6 / 2 = 3.0",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 7,
+    "fields": {
+      "task": 3,
+      "input": "7\n0",
+      "expected": "7 + 0 = 7\n7 - 0 = 7\n7 * 0 = 0\n7 / 0 = ZeroDivisionError",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 8,
+    "fields": {
+      "task": 4,
+      "input": "3725",
+      "expected": "1 ч. 2 мин. 5 сек.",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 9,
+    "fields": {
+      "task": 4,
+      "input": "60",
+      "expected": "0 ч. 1 мин. 0 сек.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 10,
+    "fields": {
+      "task": 4,
+      "input": "3600",
+      "expected": "1 ч. 0 мин. 0 сек.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 11,
+    "fields": {
+      "task": 4,
+      "input": "0",
+      "expected": "0 ч. 0 мин. 0 сек.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 12,
+    "fields": {
+      "task": 5,
+      "input": "Привет мир",
+      "expected": "Символов: 10\nСлов: 2\nВерхний регистр: ПРИВЕТ МИР",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 13,
+    "fields": {
+      "task": 5,
+      "input": "Python",
+      "expected": "Символов: 6\nСлов: 1\nВерхний регистр: PYTHON",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 14,
+    "fields": {
+      "task": 5,
+      "input": "один два три",
+      "expected": "Символов: 12\nСлов: 3\nВерхний регистр: ОДИН ДВА ТРИ",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 15,
+    "fields": {
+      "task": 6,
+      "input": "кабак",
+      "expected": "кабак — это палиндром!",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 16,
+    "fields": {
+      "task": 6,
+      "input": "python",
+      "expected": "python — не палиндром. Наоборот: nohtyp",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 17,
+    "fields": {
+      "task": 6,
+      "input": "шалаш",
+      "expected": "шалаш — это палиндром!",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 18,
+    "fields": {
+      "task": 6,
+      "input": "мир",
+      "expected": "мир — не палиндром. Наоборот: рим",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 19,
+    "fields": {
+      "task": 7,
+      "input": "95",
+      "expected": "Ваша оценка: Отлично",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 20,
+    "fields": {
+      "task": 7,
+      "input": "80",
+      "expected": "Ваша оценка: Хорошо",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 21,
+    "fields": {
+      "task": 7,
+      "input": "55",
+      "expected": "Ваша оценка: Удовлетворительно",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 22,
+    "fields": {
+      "task": 7,
+      "input": "30",
+      "expected": "Ваша оценка: Неудовлетворительно",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 23,
+    "fields": {
+      "task": 7,
+      "input": "100",
+      "expected": "Ваша оценка: Отлично",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 24,
+    "fields": {
+      "task": 7,
+      "input": "0",
+      "expected": "Ваша оценка: Неудовлетворительно",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 25,
+    "fields": {
+      "task": 8,
+      "input": "12",
+      "expected": "12 — чётное\n12 делится на 3",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 26,
+    "fields": {
+      "task": 8,
+      "input": "7",
+      "expected": "7 — нечётное\n7 не делится на 3",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 27,
+    "fields": {
+      "task": 8,
+      "input": "9",
+      "expected": "9 — нечётное\n9 делится на 3",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 28,
+    "fields": {
+      "task": 8,
+      "input": "10",
+      "expected": "10 — чётное\n10 не делится на 3",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 29,
+    "fields": {
+      "task": 9,
+      "input": "7",
+      "expected": "7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28\n7 x 5 = 35\n7 x 6 = 42\n7 x 7 = 49\n7 x 8 = 56\n7 x 9 = 63\n7 x 10 = 70",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 30,
+    "fields": {
+      "task": 9,
+      "input": "3",
+      "expected": "3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15\n3 x 6 = 18\n3 x 7 = 21\n3 x 8 = 24\n3 x 9 = 27\n3 x 10 = 30",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 31,
+    "fields": {
+      "task": 9,
+      "input": "1",
+      "expected": "1 x 1 = 1\n1 x 2 = 2\n1 x 3 = 3\n1 x 4 = 4\n1 x 5 = 5\n1 x 6 = 6\n1 x 7 = 7\n1 x 8 = 8\n1 x 9 = 9\n1 x 10 = 10",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 32,
+    "fields": {
+      "task": 10,
+      "input": "",
+      "expected": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\nFizz\n22\n23\nFizz\nBuzz\n26\nFizz\n28\n29\nFizzBuzz\n31\n32\nFizz\n34\nBuzz\nFizz\n37\n38\nFizz\nBuzz\n41\nFizz\n43\n44\nFizzBuzz\n46\n47\nFizz\n49\nBuzz",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 33,
+    "fields": {
+      "task": 11,
+      "input": "1234",
+      "expected": "Доступ разрешён!",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 34,
+    "fields": {
+      "task": 11,
+      "input": "0000\n1111\n1234",
+      "expected": "Неверно. Осталось попыток: 2\nНеверно. Осталось попыток: 1\nДоступ разрешён!",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 35,
+    "fields": {
+      "task": 11,
+      "input": "0000\n1111\n2222",
+      "expected": "Неверно. Осталось попыток: 2\nНеверно. Осталось попыток: 1\nАккаунт заблокирован.",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 36,
+    "fields": {
+      "task": 12,
+      "input": "",
+      "expected": "Привет, Максим!\nДобрый день, Анна!",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 37,
+    "fields": {
+      "task": 13,
+      "input": "я люблю python и python люблю я",
+      "expected": "Топ-3 слова:\n  'я' — 2 раз\n  'люблю' — 2 раз\n  'python' — 2 раз",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 38,
+    "fields": {
+      "task": 13,
+      "input": "кот кот кот собака собака рыба",
+      "expected": "Топ-3 слова:\n  'кот' — 3 раз\n  'собака' — 2 раз\n  'рыба' — 1 раз",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 39,
+    "fields": {
+      "task": 14,
+      "input": "1 2 3 1 2 4 5 3 6 1",
+      "expected": "Уникальные числа: [1, 2, 3, 4, 5, 6]\nКоличество уникальных: 6",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 40,
+    "fields": {
+      "task": 14,
+      "input": "5 5 5 5 5 5 5 5 5 5",
+      "expected": "Уникальные числа: [5]\nКоличество уникальных: 1",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 41,
+    "fields": {
+      "task": 14,
+      "input": "1 2 3 4 5 6 7 8 9 10",
+      "expected": "Уникальные числа: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nКоличество уникальных: 10",
+      "is_hidden": true
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 42,
+    "fields": {
+      "task": 15,
+      "input": "",
+      "expected": "Общие друзья: {'Боря', 'Гена'}\nТолько у первого: {'Аня', 'Вася'}\nТолько у второго: {'Дима', 'Елена'}",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 43,
+    "fields": {
+      "task": 16,
+      "input": "25\n1.8",
+      "expected": "Возраст: 25, рост: 1.8 м",
+      "is_hidden": false
+    }
+  },
+  {
+    "model": "practikum.testcase",
+    "pk": 44,
+    "fields": {
+      "task": 16,
+      "input": "abc\n25\nxyz\n1.75",
+      "expected": "Ошибка: введите корректное значение типа int.\nОшибка: введите корректное значение типа float.\nВозраст: 25, рост: 1.75 м",
+      "is_hidden": true
+    }
+  }
+]
