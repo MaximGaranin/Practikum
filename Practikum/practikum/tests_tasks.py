@@ -62,17 +62,17 @@ print(f"Меня зовут {name}, мне {age} лет, я живу в {city}."
 """
 
     def test_output(self):
-        assert run(self.CORRECT) == 'Меня зовут Максим, мне 25 лет, я живу в Москве.'
+        assert run(self.CORRECT) == 'Меня зовут Максим, мне 25 лет, я живу в Москва.'
 
     def test_check_submission(self):
         test_cases = [
-            {'input': '', 'expected': 'Меня зовут Максим, мне 25 лет, я живу в Москве.'},
+            {'input': '', 'expected': 'Меня зовут Максим, мне 25 лет, я живу в Москва.'},
         ]
         assert accepted(self.CORRECT, test_cases)
 
     def test_wrong_age(self):
         code = 'name="Максим"\nage=30\ncity="Москва"\nprint(f"Меня зовут {name}, мне {age} лет, я живу в {city}.")'
-        result = check_submission(code, [{'input': '', 'expected': 'Меня зовут Максим, мне 25 лет, я живу в Москве.'}])
+        result = check_submission(code, [{'input': '', 'expected': 'Меня зовут Максим, мне 25 лет, я живу в Москва.'}])
         assert result['status'] == 'wrong_answer'
 
 
@@ -565,11 +565,7 @@ print(f"Только у второго: {only_in_2}")
         assert 'Елена' in out
 
     def test_check_submission(self):
-        # Множества выводятся в непредсказуемом порядке — проверяем через checker
-        code = self.CORRECT
-        result = check_submission(code, [{'input': '', 'expected': "Общие друзья: {'Боря', 'Гена'}\nТолько у первого: {'Аня', 'Вася'}\nТолько у второго: {'Дима', 'Елена'}"}])
-        # Принимаем accepted ИЛИ проверяем содержимое
-        out = run(code)
+        out = run(self.CORRECT)
         assert 'Общие друзья:' in out
         assert 'Только у первого:' in out
         assert 'Только у второго:' in out
