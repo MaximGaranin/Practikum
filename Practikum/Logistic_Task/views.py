@@ -8,13 +8,13 @@ from . import models
 from editor.code_analyzer import CodeAnalyzer
 from editor.docker_executor import DockerExecutor
 from Logistic_Task.models import UserTaskProgress
+from practikum.checker import run_python
 import math
 
 def course_program(request, course_id=None):
     course = get_object_or_404(models.Course, id=course_id)
     list_topic = course.topics.all().order_by('id')
 
-    # Считаем прогресс по курсу
     progress_percent = 0
     progress_ring_offset = 94.2
 
@@ -50,11 +50,10 @@ def course_task(request, course_id=None, task_id=None):
     all_tasks = list(topic.tasks.all().order_by('id')) if topic else []
     total_tasks = len(all_tasks)
 
-    # Находим номер текущей задачи и ID соседних задач
     task_number = 0
     previous_task_id = None
     next_task_id = None
-    
+
     for i, t in enumerate(all_tasks):
         if t.id == task.id:
             task_number = i + 1
@@ -72,8 +71,8 @@ def course_task(request, course_id=None, task_id=None):
         'course_id': course_id,
         'topic': topic,
         'task_number': task_number,
-        'next_task': next_task_id,  # Изменено: теперь ID, а не номер
-        'previous_task': previous_task_id,  # Изменено: теперь ID, а не номер
+        'next_task': next_task_id,
+        'previous_task': previous_task_id,
         'total_tasks': total_tasks,
     }
 
@@ -82,7 +81,6 @@ def course_task(request, course_id=None, task_id=None):
 
 @login_required
 def enroll_course(request, course_id):
-    """Записать пользователя на курс"""
     course = get_object_or_404(models.Course, id=course_id)
 
     if request.user not in course.students.all():
@@ -94,84 +92,62 @@ def enroll_course(request, course_id):
     return redirect('task_mananger:course_program', course_id=course_id)
 
 
-# ==================== НОВЫЕ ФУНКЦИИ ДЛЯ ГИБРИДНОГО РЕДАКТОРА ====================
-
 @require_http_methods(["POST"])
 def analyze_code(request):
-    """Анализ кода и определение режима выполнения"""
     try:
         data = json.loads(request.body)
         code = data.get('code', '')
         task_id = data.get('task_id')
-        
+
         if not code.strip():
-            return JsonResponse({
-                'error': 'Код не может быть пустым'
-            }, status=400)
-        
-        # Анализ кода
+            return JsonResponse({'error': 'Код не может быть пустым'}, status=400)
+
         analyzer = CodeAnalyzer(code)
         result = analyzer.analyze()
-        
-        # Логирование (опционально)
+
         if task_id:
             task = models.Task.objects.filter(id=task_id).first()
             if task:
                 print(f"[Анализ] Задача: {task.name}, Режим: {result['execution_mode']}")
-        
+
         return JsonResponse(result)
-        
+
     except json.JSONDecodeError:
-        return JsonResponse({
-            'error': 'Неверный формат данных'
-        }, status=400)
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
-        return JsonResponse({
-            'error': f'Ошибка анализа: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Ошибка анализа: {str(e)}'}, status=500)
 
 
 @require_http_methods(["POST"])
 def execute_code(request):
-    """Выполнение кода на сервере (Docker)"""
     try:
         data = json.loads(request.body)
         code = data.get('code', '')
         task_id = data.get('task_id')
-        
+
         if not code.strip():
-            return JsonResponse({
-                'error': 'Код не может быть пустым'
-            }, status=400)
-        
-        # Анализ кода
+            return JsonResponse({'error': 'Код не может быть пустым'}, status=400)
+
         analyzer = CodeAnalyzer(code)
         analysis = analyzer.analyze()
-        
-        # Выполнение в Docker
+
         executor = DockerExecutor()
         result = executor.execute(code, timeout=10)
-        
-        # Добавляем информацию об анализе
+
         result['analysis'] = analysis
         result['execution_mode'] = 'server'
-        
-        # Логирование (опционально)
+
         if task_id:
             task = models.Task.objects.filter(id=task_id).first()
             if task:
                 print(f"[Выполнение] Задача: {task.name}, Успех: {result['success']}")
-        
+
         return JsonResponse(result)
-        
+
     except json.JSONDecodeError:
-        return JsonResponse({
-            'error': 'Неверный формат данных'
-        }, status=400)
+        return JsonResponse({'error': 'Неверный формат данных'}, status=400)
     except Exception as e:
-        return JsonResponse({
-            'error': f'Ошибка выполнения: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Ошибка выполнения: {str(e)}'}, status=500)
 
 
 @require_http_methods(["POST"])
@@ -180,19 +156,60 @@ def check_task(request):
         data = json.loads(request.body)
         task_id = data.get('task_id')
         code = data.get('code', '')
-        output = data.get('output', '')
 
         task = get_object_or_404(models.Task, id=task_id)
+
+        # Получаем все тест-кейсы задания
+        test_cases = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
 
         is_correct = False
         feedback_message = ''
 
-        if task.expected_output:
-            is_correct = output.strip() == task.expected_output.strip()
-            feedback_message = '🎉 Задание решено правильно!' if is_correct else '⚠️ Результат не совпадает. Попробуйте ещё раз.'
+        if test_cases:
+            # Прогоняем код через каждый тест-кейс
+            failed_cases = []
+            for tc in test_cases:
+                result = run_python(code, tc['input'])
+                actual = result.get('stdout', '').strip()
+                expected = tc['expected'].strip()
+                if actual != expected:
+                    failed_cases.append({
+                        'is_hidden': tc['is_hidden'],
+                        'input': tc['input'],
+                        'expected': expected,
+                        'actual': actual,
+                    })
+
+            if not failed_cases:
+                is_correct = True
+                feedback_message = '🎉 Задание решено правильно!'
+            else:
+                # Показываем только открытые провалывшие кейсы
+                visible_fails = [f for f in failed_cases if not f['is_hidden']]
+                hidden_fails  = [f for f in failed_cases if f['is_hidden']]
+
+                if visible_fails:
+                    f = visible_fails[0]
+                    feedback_message = (
+                        f"❌ Неверный ответ.\n"
+                        f"Ввод: {f['input'] or '(пусто)'}\n"
+                        f"Ожидалось: {f['expected']}\n"
+                        f"Получено: {f['actual']}"
+                    )
+                elif hidden_fails:
+                    feedback_message = (
+                        f"❌ Неверный ответ на скрытом тесте. "
+                        f"Проверьте, что решение работает для любых значений, а не только для примера из условия."
+                    )
         else:
-            is_correct = bool(output.strip()) and 'error' not in output.lower()
-            feedback_message = '✓ Код выполнен успешно!' if is_correct else 'Проверьте результат.'
+            # Тест-кейсов нет — фолбэк на поле expected_output
+            output = data.get('output', '')
+            if task.expected_output:
+                is_correct = output.strip() == task.expected_output.strip()
+                feedback_message = '🎉 Задание решено правильно!' if is_correct else '⚠️ Результат не совпадает. Попробуйте ещё раз.'
+            else:
+                is_correct = bool(output.strip()) and 'error' not in output.lower()
+                feedback_message = '✓ Код выполнен успешно!' if is_correct else 'Проверьте результат.'
 
         # Сохраняем прогресс
         if request.user.is_authenticated:
@@ -211,7 +228,7 @@ def check_task(request):
         return JsonResponse({
             'correct': is_correct,
             'message': feedback_message,
-            'task_completed': is_correct
+            'task_completed': is_correct,
         })
 
     except json.JSONDecodeError:
@@ -268,7 +285,7 @@ def search_courses(request):
     query = request.GET.get('q', '').strip()
     if not query:
         return JsonResponse({'results': []})
-    
+
     courses = models.Course.objects.filter(name__icontains=query)
     results = [{'id': c.id, 'name': c.name} for c in courses]
     return JsonResponse({'results': results})
