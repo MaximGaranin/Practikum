@@ -167,11 +167,11 @@
         </main>
     </div>
 
-    <script src="{% static 'pyodide/pyodide.js' %}"></script>
-    <script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
-    <script src="{% static 'codemirror/mode/python/python.js' %}"></script>
-    <script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
-    <script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>
+	<script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+	<script src="{% static 'codemirror/mode/python/python.js' %}"></script>
+	<script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
+	<script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>
+	<script src="{% static 'pyodide/pyodide.js' %}"></script>
 
     <script>
         let editor;
@@ -181,7 +181,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeEditor();
-            initPyodide();
         });
 
         function initializeEditor() {
@@ -270,7 +269,8 @@
                     displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
                     return;
                 }
-                if (analysis.execution_mode === 'client' && pyodide) {
+                const hasInput = code.includes('input(');
+                if (analysis.execution_mode === 'client' && pyodide && !hasInput) {
                     await executeInBrowser(code, analysis, false);
                 } else {
                     await executeOnServer(code, analysis, false);
@@ -313,7 +313,8 @@
                     displayOutput(`❌ Ошибка анализа: ${analysis.error}`, 'error');
                     return;
                 }
-                if (analysis.execution_mode === 'client' && pyodide) {
+                const hasInput = code.includes('input(');
+                if (analysis.execution_mode === 'client' && pyodide && !hasInput) {
                     await executeInBrowser(code, analysis, true);
                 } else {
                     await executeOnServer(code, analysis, true);

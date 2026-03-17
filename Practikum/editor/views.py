@@ -46,7 +46,18 @@ def execute_code(request):
 
         if mode == 'client':
             from practikum.checker import run_python
-            raw = run_python(code, '', time_limit=5)
+            task_id = data.get('task_id')
+            stdin = ''
+            if task_id:
+                try:
+                    from Logistic_Task.models import Task
+                    task = Task.objects.get(id=task_id)
+                    tc = task.testcase_set.values('input').first()
+                    if tc:
+                        stdin = tc['input'] or ''
+                except Exception:
+                    pass
+            raw = run_python(code, stdin, time_limit=5)
             return JsonResponse({
                 'success': raw['returncode'] == 0,
                 'output': raw['stdout'],

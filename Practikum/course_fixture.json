@@ -1,0 +1,221 @@
+[
+  {
+    "model": "Logistic_Task.course",
+    "pk": 1,
+    "fields": {
+      "name": "Python с нуля: от переменных до проектов",
+      "topics": [1, 2, 3, 4],
+      "students": []
+    }
+  },
+
+  {
+    "model": "Logistic_Task.topic",
+    "pk": 1,
+    "fields": { "name": "Блок 1 — Основы", "image": null, "tasks": [1, 2, 3, 4, 5, 6], "order": 1 }
+  },
+  {
+    "model": "Logistic_Task.topic",
+    "pk": 2,
+    "fields": { "name": "Блок 2 — Управление потоком", "image": null, "tasks": [7, 8, 9, 10, 11], "order": 2 }
+  },
+  {
+    "model": "Logistic_Task.topic",
+    "pk": 3,
+    "fields": { "name": "Блок 3 — Функции и структуры данных", "image": null, "tasks": [12, 13, 14, 15], "order": 3 }
+  },
+  {
+    "model": "Logistic_Task.topic",
+    "pk": 4,
+    "fields": { "name": "Блок 4 — Финальный проект", "image": null, "tasks": [16, 17], "order": 4 }
+  },
+
+  {
+    "model": "Logistic_Task.task",
+    "pk": 1,
+    "fields": {
+      "name": "1.1 — Привет, мир!",
+      "text_task": "<p>Напишите программу, которая спрашивает имя пользователя и выводит приветствие в формате:</p><pre>Привет, {имя}! Добро пожаловать в курс Python.</pre>",
+      "initial_code": "# Спросите имя пользователя с помощью input()\nname = ...\n\n# Выведите приветствие\nprint(...)",
+      "expected_output": "Привет, Максим! Добро пожаловать в курс Python.",
+      "order": 1
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 2,
+    "fields": {
+      "name": "1.2 — Визитка",
+      "text_task": "<p>Создайте переменные <code>name</code>, <code>age</code>, <code>city</code> и выведите их в одном предложении через f-строку.</p>",
+      "initial_code": "name = \"Максим\"\nage = ...\ncity = ...\n\n# Выведите одной строкой через f-строку\nprint(f\"Меня зовут ...\")",
+      "expected_output": "Меня зовут Максим, мне 25 лет, я живу в Москве.",
+      "order": 2
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 3,
+    "fields": {
+      "name": "2.1 — Калькулятор",
+      "text_task": "<p>Программа принимает два числа и выводит результат всех 4 арифметических операций. Деление округлите до 2 знаков.</p>",
+      "initial_code": "a = int(input(\"Введите первое число: \"))\nb = int(input(\"Введите второе число: \"))\n\n# Выведите результаты всех 4 операций\nprint(f\"{a} + {b} = ...\")\nprint(...)\nprint(...)\nprint(...)",
+      "expected_output": "10 + 3 = 13\n10 - 3 = 7\n10 * 3 = 30\n10 / 3 = 3.33",
+      "order": 3
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 4,
+    "fields": {
+      "name": "2.2 — Перевод времени",
+      "text_task": "<p>Пользователь вводит количество секунд. Переведите их в часы, минуты и секунды.</p><p>Подсказка: используйте операторы <code>//</code> и <code>%</code>.</p>",
+      "initial_code": "total_seconds = int(input(\"Введите секунды: \"))\n\nhours = ...      # используйте //\nminutes = ...    # используйте % и //\nseconds = ...    # используйте %\n\nprint(f\"... ч. ... мин. ... сек.\")",
+      "expected_output": "1 ч. 2 мин. 5 сек.",
+      "order": 4
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 5,
+    "fields": {
+      "name": "3.1 — Анализ строки",
+      "text_task": "<p>Пользователь вводит предложение. Выведите: количество символов, количество слов и строку в верхнем регистре.</p>",
+      "initial_code": "text = input(\"Введите предложение: \")\n\nchar_count = ...   # len()\nword_count = ...   # .split()\nupper_text = ...   # .upper()\n\nprint(f\"Символов: ...\")\nprint(f\"Слов: ...\")\nprint(f\"Верхний регистр: ...\")",
+      "expected_output": "Символов: 10\nСлов: 2\nВерхний регистр: ПРИВЕТ МИР",
+      "order": 5
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 6,
+    "fields": {
+      "name": "3.2 — Палиндром",
+      "text_task": "<p>Введите слово. Программа выводит его задом наперёд и проверяет, является ли оно палиндромом.</p><p>Подсказка: переворот строки — <code>word[::-1]</code>.</p>",
+      "initial_code": "word = input(\"Введите слово: \")\n\nreversed_word = ...   # word[::-1]\n\nif ...:\n    print(f\"{word} — это палиндром!\")\nelse:\n    print(f\"{word} — не палиндром. Наоборот: {reversed_word}\")",
+      "expected_output": "кабак — это палиндром!",
+      "order": 6
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 7,
+    "fields": {
+      "name": "4.1 — Оценка по баллу",
+      "text_task": "<p>Пользователь вводит балл от 0 до 100. Программа выводит оценку:</p><ul><li>90–100 → Отлично</li><li>70–89 → Хорошо</li><li>50–69 → Удовлетворительно</li><li>0–49 → Неудовлетворительно</li></ul>",
+      "initial_code": "score = int(input(\"Введите балл (0-100): \"))\n\nif score >= 90:\n    grade = \"Отлично\"\nelif ...:\n    grade = ...\nelif ...:\n    grade = ...\nelse:\n    grade = ...\n\nprint(f\"Ваша оценка: {grade}\")",
+      "expected_output": "Ваша оценка: Отлично",
+      "order": 7
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 8,
+    "fields": {
+      "name": "4.2 — Чётное/нечётное",
+      "text_task": "<p>Введите число. Программа определяет, чётное оно или нечётное, и делится ли оно на 3.</p>",
+      "initial_code": "num = int(input(\"Введите число: \"))\n\nif num % 2 == 0:\n    print(f\"{num} — чётное\")\nelse:\n    print(f\"{num} — нечётное\")\n\nif ...:\n    print(f\"{num} делится на 3\")\nelse:\n    print(f\"{num} не делится на 3\")",
+      "expected_output": "12 — чётное\n12 делится на 3",
+      "order": 8
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 9,
+    "fields": {
+      "name": "5.1 — Таблица умножения",
+      "text_task": "<p>Выведите таблицу умножения для числа, введённого пользователем (от 1 до 10).</p>",
+      "initial_code": "num = int(input(\"Введите число: \"))\n\nfor i in range(1, 11):\n    result = ...\n    print(f\"{num} x {i} = {result}\")",
+      "expected_output": "7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28\n7 x 5 = 35\n7 x 6 = 42\n7 x 7 = 49\n7 x 8 = 56\n7 x 9 = 63\n7 x 10 = 70",
+      "order": 9
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 10,
+    "fields": {
+      "name": "5.2 — FizzBuzz",
+      "text_task": "<p>Выведите числа от 1 до 50. Вместо чисел кратных 3 — <b>Fizz</b>, кратных 5 — <b>Buzz</b>, кратных обоим — <b>FizzBuzz</b>.</p>",
+      "initial_code": "for i in range(1, 51):\n    if i % 3 == 0 and i % 5 == 0:\n        print(...)\n    elif ...:\n        print(...)\n    elif ...:\n        print(...)\n    else:\n        print(i)",
+      "expected_output": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\nFizz\n22\n23\nFizz\nBuzz\n26\nFizz\n28\n29\nFizzBuzz\n31\n32\nFizz\n34\nBuzz\nFizz\n37\n38\nFizz\nBuzz\n41\nFizz\n43\n44\nFizzBuzz\n46\n47\nFizz\n49\nBuzz",
+      "order": 10
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 11,
+    "fields": {
+      "name": "6.2 — Пин-код",
+      "text_task": "<p>Программа принимает пин-код <code>1234</code>. Пользователю даётся 3 попытки, после чего — блокировка.</p>",
+      "initial_code": "correct_pin = \"1234\"\nmax_attempts = 3\nattempts = 0\n\nwhile attempts < max_attempts:\n    pin = input(\"Введите пин-код: \")\n    attempts += 1\n\n    if pin == correct_pin:\n        print(\"Доступ разрешён!\")\n        break\n    else:\n        remaining = max_attempts - attempts\n        if remaining > 0:\n            print(f\"Неверно. Осталось попыток: {remaining}\")\n        else:\n            print(...)  # сообщение о блокировке",
+      "expected_output": "Доступ разрешён!",
+      "order": 11
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 12,
+    "fields": {
+      "name": "7.1 — Функция приветствия",
+      "text_task": "<p>Напишите функцию <code>greet(name, greeting=\"Привет\")</code>, которая возвращает строку приветствия. Вызовите её дважды: с одним и двумя аргументами.</p>",
+      "initial_code": "def greet(name, greeting=\"Привет\"):\n    # Верните строку: \"Привет, Максим!\"\n    return ...\n\nprint(greet(\"Максим\"))\nprint(greet(\"Анна\", \"Добрый день\"))",
+      "expected_output": "Привет, Максим!\nДобрый день, Анна!",
+      "order": 12
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 13,
+    "fields": {
+      "name": "8.2 — Счётчик слов",
+      "text_task": "<p>Пользователь вводит текст. Программа считает частоту каждого слова и выводит топ-3 самых частых.</p>",
+      "initial_code": "text = input(\"Введите текст: \").lower()\nwords = text.split()\n\nword_count = {}\nfor word in words:\n    word_count[word] = word_count.get(word, 0) + 1\n\n# Отсортируйте по частоте и возьмите топ-3\ntop3 = sorted(word_count.items(), key=lambda x: x[1], reverse=True)[:3]\n\nprint(\"\\nТоп-3 слова:\")\nfor word, count in top3:\n    print(f\"  '{word}' — {count} раз\")",
+      "expected_output": "Топ-3 слова:\n  'я' — 2 раз\n  'люблю' — 2 раз\n  'python' — 2 раз",
+      "order": 13
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 14,
+    "fields": {
+      "name": "9.1 — Уникальные элементы",
+      "text_task": "<p>Пользователь вводит 10 чисел через пробел. Выведите только уникальные числа (отсортированные) и их количество.</p><p>Подсказка: используйте <code>set()</code>.</p>",
+      "initial_code": "numbers = input(\"Введите 10 чисел через пробел: \").split()\nnumbers = [int(n) for n in numbers]\n\nunique = ...   # используйте set()\n\nprint(f\"Уникальные числа: {sorted(unique)}\")\nprint(f\"Количество уникальных: {len(unique)}\")",
+      "expected_output": "Уникальные числа: [1, 2, 3, 4, 5, 6]\nКоличество уникальных: 6",
+      "order": 14
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 15,
+    "fields": {
+      "name": "9.2 — Общие друзья",
+      "text_task": "<p>Даны два множества с именами друзей. Найдите общих друзей, а также тех, кто есть только в каждом из списков.</p><p>Подсказка: используйте операции <code>&</code>, <code>-</code> над множествами.</p>",
+      "initial_code": "friends1 = {\"Аня\", \"Боря\", \"Вася\", \"Гена\"}\nfriends2 = {\"Боря\", \"Гена\", \"Дима\", \"Елена\"}\n\ncommon = ...       # пересечение\nonly_in_1 = ...    # только в первом\nonly_in_2 = ...    # только во втором\n\nprint(f\"Общие друзья: {common}\")\nprint(f\"Только у первого: {only_in_1}\")\nprint(f\"Только у второго: {only_in_2}\")",
+      "expected_output": "Общие друзья: {'Боря', 'Гена'}\nТолько у первого: {'Аня', 'Вася'}\nТолько у второго: {'Дима', 'Елена'}",
+      "order": 15
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 16,
+    "fields": {
+      "name": "11.1 — Безопасный ввод",
+      "text_task": "<p>Напишите функцию <code>safe_input(prompt, type_)</code>, которая просит ввести значение и не падает при некорректном вводе — просит ввести заново.</p>",
+      "initial_code": "def safe_input(prompt, type_=int):\n    while True:\n        try:\n            return type_(input(prompt))\n        except ValueError:\n            print(f\"Ошибка: введите корректное значение типа {type_.__name__}.\")\n\nage = safe_input(\"Введите возраст: \", int)\nheight = safe_input(\"Введите рост (м): \", float)\nprint(f\"Возраст: {age}, рост: {height} м\")",
+      "expected_output": "Возраст: 25, рост: 1.8 м",
+      "order": 16
+    }
+  },
+  {
+    "model": "Logistic_Task.task",
+    "pk": 17,
+    "fields": {
+      "name": "12 — ToDo-менеджер (финальный проект)",
+      "text_task": "<p>Напишите консольное приложение для управления задачами:</p><ul><li>Добавить задачу с приоритетом (низкий / средний / высокий)</li><li>Отметить задачу как выполненную</li><li>Удалить задачу</li><li>Показать все задачи / только активные</li></ul><p><b>Критерии:</b> код разбит на функции, обработаны ошибки ввода, есть понятное меню.</p><p>⚠️ Это задание проверяется преподавателем через код-ревью.</p>",
+      "initial_code": "tasks = []\n\ndef show_tasks(tasks, filter_done=None):\n    filtered = [t for t in tasks if filter_done is None or t[\"done\"] == filter_done]\n    if not filtered:\n        print(\"Задач нет.\")\n        return\n    for i, t in enumerate(filtered, 1):\n        status = \"✅\" if t[\"done\"] else \"⬜\"\n        print(f\"{i}. {status} [{t['priority']}] {t['title']}\")\n\nwhile True:\n    print(\"\\n1-Добавить | 2-Выполнить | 3-Удалить | 4-Все | 5-Активные | 6-Выйти\")\n    choice = input(\"Выберите: \")\n\n    if choice == \"1\":\n        title = input(\"Название: \")\n        priority = input(\"Приоритет (низкий/средний/высокий): \")\n        tasks.append({\"title\": title, \"priority\": priority, \"done\": False})\n    elif choice == \"2\":\n        show_tasks(tasks)\n        idx = int(input(\"Номер задачи: \")) - 1\n        tasks[idx][\"done\"] = True\n    elif choice == \"3\":\n        show_tasks(tasks)\n        idx = int(input(\"Номер задачи: \")) - 1\n        tasks.pop(idx)\n    elif choice == \"4\":\n        show_tasks(tasks)\n    elif choice == \"5\":\n        show_tasks(tasks, filter_done=False)\n    elif choice == \"6\":\n        break",
+      "expected_output": "",
+      "order": 17
+    }
+  }
+]
+
