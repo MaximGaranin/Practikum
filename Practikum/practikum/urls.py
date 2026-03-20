@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/notifications/', views.notifications, name='notifications'),
     path('api/notifications/read/', views.mark_notifications_read, name='notifications_read'),
     path('contest/<int:contest_id>/', views.contest_detail, name='contest_detail'),
-    path('leaderboard/',views.leaderboard, name='leaderboard'),
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
 
     # Маршруты для преподавателя
     path('teacher/', views.teacher_dashboard, name='teacher_dashboard'),
@@ -25,11 +25,9 @@ urlpatterns = [
     path('teacher/student/<int:student_id>/', views.teacher_student_detail, name='teacher_student_detail'),
     path('teacher/homework/assign/', views.teacher_assign_homework, name='teacher_assign_homework'),
     path('task/<int:task_id>/submit/', views.submit_solution, name='submit_solution'),
-    path('teacher/courses/', views.teacher_courses, name='teacher_courses'),
     path('teacher/courses/create/', views.teacher_course_create, name='teacher_course_create'),
     path('teacher/courses/<int:course_id>/edit/', views.teacher_course_edit, name='teacher_course_edit'),
     path('teacher/courses/<int:course_id>/delete/', views.teacher_course_delete, name='teacher_course_delete'),
-    path('teacher/tasks/', views.teacher_tasks, name='teacher_tasks'),
     path('teacher/tasks/create/', views.teacher_task_create, name='teacher_task_create'),
     path('teacher/tasks/<int:task_id>/edit/', views.teacher_task_edit, name='teacher_task_edit'),
     path('teacher/tasks/<int:task_id>/delete/', views.teacher_task_delete, name='teacher_task_delete'),
@@ -39,10 +37,10 @@ urlpatterns = [
     path('teacher/students/add/', views.teacher_add_student, name='teacher_add_student'),
 
     # API
+    path('api/analyze/', api_views.AnalyzeView.as_view(), name='analyze'),
     path('api/contests/', api_views.ContestListView.as_view(), name='contest_list'),
     path('api/contests/<int:contest_id>/', api_views.ContestDetailView.as_view(), name='contest_detail_api'),
     path('api/contests/<int:contest_id>/register/', api_views.ContestRegisterView.as_view(), name='contest_register'),
     path('api/contests/<int:contest_id>/submit/', api_views.ContestSubmitView.as_view(), name='contest_submit'),
     path('api/contests/<int:contest_id>/leaderboard/', api_views.ContestLeaderboardView.as_view(), name='contest_leaderboard'),
 ]
-
