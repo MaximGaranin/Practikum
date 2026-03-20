@@ -28,6 +28,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost',
                         cast=lambda v: [s.strip() for s in v.split(',')])
+CSRF_TRUSTED_ORIGINS = ['https://practicumd.duckdns.org:8443', 'http://practicumd.duckdns.org', 'http://45.38.139.65']
 
 ADMIN_SITE_HEADER = "Practikum Admin"
 ADMIN_SITE_TITLE = "Practikum"
@@ -146,3 +147,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'  # URL для доступа к медиафайлам
 MEDIA_ROOT = BASE_DIR / 'media'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

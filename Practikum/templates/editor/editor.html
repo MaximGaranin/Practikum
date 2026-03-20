@@ -7,7 +7,7 @@
     <title>Code Editor</title>
     
     <link rel="stylesheet" href="{% static 'css/edit.css' %}">
-    <link rel="stylesheet" href="{% static 'codemirror/lib/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'codemirror/src/codemirror.css' %}">
     <link rel="stylesheet" href="{% static 'codemirror/theme/monokai.css' %}">    
     
     <style>
@@ -84,6 +84,31 @@
             align-items: center;
         }
         .output-content { flex: 1; }
+	.task-text {
+        overflow-wrap: break-word;
+        word-break: break-word;
+        overflow-x: hidden;
+    }
+
+    .task-text pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-x: auto;
+        background: #1e1e1e;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .task-text code {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .sidebar {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
     </style>
 </head>
 <body>
@@ -167,7 +192,7 @@
         </main>
     </div>
 
-	<script src="{% static 'codemirror/lib/codemirror.js' %}"></script>
+	<script src="{% static 'codemirror/src/codemirror.js' %}"></script>
 	<script src="{% static 'codemirror/mode/python/python.js' %}"></script>
 	<script src="{% static 'codemirror/addon/edit/matchbrackets.js' %}"></script>
 	<script src="{% static 'codemirror/addon/edit/closebrackets.js' %}"></script>
