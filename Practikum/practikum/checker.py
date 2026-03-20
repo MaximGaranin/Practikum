@@ -135,7 +135,9 @@ def check_submission(code: str, test_cases: list) -> dict:
         'results': results,
     }
 
+
 COMPLEXITY_THRESHOLD = 50
+
 
 def is_complex_code(code: str) -> bool:
     """Сложный = много строк ИЛИ тяжёлые библиотеки."""
@@ -143,20 +145,64 @@ def is_complex_code(code: str) -> bool:
     heavy = ['numpy', 'pandas', 'scipy', 'matplotlib', 'sklearn']
     return len(lines) > COMPLEXITY_THRESHOLD or any(h in code for h in heavy)
 
+
 def run_python_docker(code: str, stdin: str, time_limit: int = 10) -> dict:
-    """Запуск кода в Docker-контейнере без сети (офлайн-режим)."""
-    import docker
-    client = docker.from_env()
+    """Запуск кода в Docker-контейнере без сети (офлайн-режим).
+
+    Исправления:
+    - Код пишется во временный файл и монтируется в контейнер (вместо -c)
+    - stdin передаётся через subprocess (поддержка input())
+    - Корректная обработка ошибок контейнера и отсутствия Docker
+    """
+    with tempfile.NamedTemporaryFile(
+        suffix='.py',
+        mode='w',
+        encoding='utf-8',
+        delete=False
+    ) as f:
+        f.write(code)
+        fname = f.name
+
     try:
-        container = client.containers.run(
-            image='python:3.11-slim',
-            command=['python3', '-c', code],
-            network_disabled=True,
-            mem_limit='128m',
-            cpu_quota=50000,
-            remove=True,
-            stdout=True, stderr=True,
+        result = subprocess.run(
+            [
+                'docker', 'run', '--rm',
+                '--network', 'none',
+                '--memory', '128m',
+                '--cpus', '0.5',
+                '-i',
+                '-v', f'{fname}:/tmp/solution.py:ro',
+                'python:3.11-slim',
+                'python3', '/tmp/solution.py',
+            ],
+            input=stdin,
+            capture_output=True,
+            text=True,
+            timeout=time_limit,
         )
-        return {'stdout': container.decode().strip(), 'stderr': '', 'returncode': 0}
+        return {
+            'stdout': result.stdout.strip(),
+            'stderr': result.stderr.strip(),
+            'returncode': result.returncode,
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            'stdout': '',
+            'stderr': 'Превышено время выполнения',
+            'returncode': -1,
+        }
+    except FileNotFoundError:
+        return {
+            'stdout': '',
+            'stderr': 'Docker не найден. Убедитесь, что Docker установлен и запущен.',
+            'returncode': -1,
+        }
     except Exception as e:
-        return {'stdout': '', 'stderr': str(e), 'returncode': -1}
+        return {
+            'stdout': '',
+            'stderr': str(e),
+            'returncode': -1,
+        }
+    finally:
+        if os.path.exists(fname):
+            os.unlink(fname)
