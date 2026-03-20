@@ -121,7 +121,7 @@
                 <div class="output-section">
                     <div class="output-header">
                         <span>Результат</span>
-                        <span id="executionMode" class="execution-mode mode-loading">Готов</span>
+                        <span id="executionMode" class="execution-mode mode-loading">Загрузка...</span>
                         <span id="executionTime" style="font-size: 12px; color: #858585;"></span>
                     </div>
                     <div class="output-content" id="output">
@@ -181,6 +181,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeEditor();
+            initPyodide();  // ← автозапуск Pyodide при загрузке страницы
         });
 
         function initializeEditor() {
@@ -206,7 +207,7 @@
                     "Cmd-Enter": function(cm) { runCode(); }
                 }
             });
-            updateExecutionMode('Готов', 'loading');
+            updateExecutionMode('Загрузка...', 'loading');
         }
 
         async function initPyodide() {
@@ -217,7 +218,7 @@
                 pyodide = await loadPyodide({
                     indexURL: "{% static 'pyodide/' %}"
                 });
-                updateExecutionMode('Готов (Гибрид)', 'client');
+                updateExecutionMode('Готов (Браузер)', 'client');
             } catch (error) {
                 console.error('Ошибка загрузки Pyodide:', error);
                 updateExecutionMode('Готов (Сервер)', 'server');
@@ -245,6 +246,11 @@
             const code = editor.getValue().trim();
             if (!code) {
                 displayOutput('⚠ Введите код для выполнения', 'error');
+                return;
+            }
+            // Если Pyodide ещё грузится — подождём
+            if (pyodideLoading) {
+                displayOutput('⏳ Pyodide ещё загружается, подождите...', 'info');
                 return;
             }
             const btn = document.getElementById('justRunButton');
@@ -289,6 +295,11 @@
             const code = editor.getValue().trim();
             if (!code) {
                 displayOutput('⚠ Введите код для выполнения', 'error');
+                return;
+            }
+            // Если Pyodide ещё грузится — подождём
+            if (pyodideLoading) {
+                displayOutput('⏳ Pyodide ещё загружается, подождите...', 'info');
                 return;
             }
             const runBtn = document.getElementById('runButton');
@@ -509,4 +520,3 @@ sys.stderr = StringIO()
     </script>
 </body>
 </html>
-
