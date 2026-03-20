@@ -244,7 +244,17 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(async () => {
+          // Офлайн-обработка /api/check/
           if (url.pathname === '/api/check/' && event.request.method === 'POST') {
+            const body = await event.request.clone().json();
+            const pack = await loadPack();
+            const result = await checkOffline(body.code || '', body.task_id, pack);
+            return new Response(JSON.stringify(result), {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          }
+          // Офлайн-обработка /api/analyze/
+          if (url.pathname === '/api/analyze/' && event.request.method === 'POST') {
             const body = await event.request.clone().json();
             const pack = await loadPack();
             const result = await checkOffline(body.code || '', body.task_id, pack);
