@@ -3,13 +3,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.conf import settings
 import json
 from . import models
 from editor.code_analyzer import CodeAnalyzer
 from editor.docker_executor import DockerExecutor
 from Logistic_Task.models import UserTaskProgress
 from practikum.checker import run_python
+from .crypto_utils import build_offline_pack
 import math
+import base64
+import os
+
 
 def course_program(request, course_id=None):
     course = get_object_or_404(models.Course, id=course_id)
@@ -289,3 +294,53 @@ def search_courses(request):
     courses = models.Course.objects.filter(name__icontains=query)
     results = [{'id': c.id, 'name': c.name} for c in courses]
     return JsonResponse({'results': results})
+
+
+@require_http_methods(["GET"])
+def get_offline_pack(request):
+    """
+    Returns AES-GCM encrypted offline pack for all tasks.
+
+    Structure:
+    {
+      "expires_at": <unix_timestamp>,
+      "tasks": {
+        "<task_id>": {
+          "key_b64": "<base64 AES-256 key>",
+          "tests": [
+            {
+              "input_enc": "<plaintext or encrypted>",
+              "is_hidden": bool,
+              "expected_enc": "<AES-GCM base64>"   // ALWAYS encrypted
+            }
+          ]
+        }
+      }
+    }
+
+    - expected_enc is ALWAYS encrypted — correct answers never leave server in plaintext.
+    - Hidden test inputs are also encrypted.
+    - Keys expire after 24 hours; client must re-fetch when online.
+    - Master secret is taken from settings.OFFLINE_PACK_SECRET (set in .env).
+    """
+    master_secret_b64 = getattr(settings, 'OFFLINE_PACK_SECRET', None)
+    if not master_secret_b64:
+        # Fallback: derive from Django SECRET_KEY (not ideal for production)
+        import hashlib
+        master_secret = hashlib.sha256(settings.SECRET_KEY.encode()).digest()
+    else:
+        master_secret = base64.b64decode(master_secret_b64)
+
+    # Gather all tasks and their test cases
+    tasks_testcases = {}
+    for task in models.Task.objects.prefetch_related('testcase_set').all():
+        tcs = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
+        if tcs:
+            tasks_testcases[str(task.id)] = tcs
+
+    pack = build_offline_pack(tasks_testcases, master_secret)
+
+    response = JsonResponse(pack)
+    # Cache-Control: allow browser/SW to cache, but revalidate after TTL
+    response['Cache-Control'] = 'private, max-age=86400'
+    return response
