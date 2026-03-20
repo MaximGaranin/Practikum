@@ -237,14 +237,29 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(event.request)
         .then(async response => {
+          // Сохраняем офлайн-пак в IndexedDB при успешном получении
           if (url.pathname === OFFLINE_PACK_URL && response.ok) {
             const clone = response.clone();
-            clone.json().then(pack => savePack(pack));
+            clone.json().then(pack => savePack(pack)).catch(() => {});
           }
           return response;
         })
         .catch(async () => {
-          // Офлайн-обработка /api/check/
+          // Офлайн: /api/offline-pack/ — отдаём закэшированный пак из IndexedDB
+          if (url.pathname === OFFLINE_PACK_URL) {
+            const pack = await loadPack();
+            if (pack) {
+              return new Response(JSON.stringify(pack), {
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            return new Response(JSON.stringify({ error: 'Офлайн-пак не найден. Зайдите онлайн для загрузки.' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' },
+            });
+          }
+
+          // Офлайн: /api/check/
           if (url.pathname === '/api/check/' && event.request.method === 'POST') {
             const body = await event.request.clone().json();
             const pack = await loadPack();
@@ -253,7 +268,8 @@ self.addEventListener('fetch', event => {
               headers: { 'Content-Type': 'application/json' },
             });
           }
-          // Офлайн-обработка /api/analyze/
+
+          // Офлайн: /api/analyze/
           if (url.pathname === '/api/analyze/' && event.request.method === 'POST') {
             const body = await event.request.clone().json();
             const pack = await loadPack();
@@ -262,6 +278,7 @@ self.addEventListener('fetch', event => {
               headers: { 'Content-Type': 'application/json' },
             });
           }
+
           return new Response(JSON.stringify({ error: 'Нет соединения с сервером' }), {
             status: 503,
             headers: { 'Content-Type': 'application/json' },
