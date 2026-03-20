@@ -2,23 +2,34 @@
  * Service Worker — офлайн поддержка Practikum
  *
  * При первом визите (онлайн):
- *   1. Кэшируем статику и страницы
+ *   1. Кэшируем статику, страницы и Pyodide (~10MB)
  *   2. Загружаем зашифрованный офлайн-пак (/api/offline-pack/)
  *      и сохраняем в IndexedDB
  *
  * При офлайн-визите:
  *   - Статика и страницы отдаются из кэша
+ *   - Pyodide грузится из кэша (не из CDN)
  *   - Ключи AES-GCM берутся из IndexedDB
  *   - Pyodide выполняет код пользователя в браузере
- *   - Вывод шифруется тем же ключом и сравнивается с expected_enc
+ *   - Вывод сравнивается с расшифрованным expected_enc
  */
 
-const CACHE_NAME = 'practikum-v1';
+const CACHE_NAME = 'practikum-v2';
 const OFFLINE_PACK_URL = '/api/offline-pack/';
 const DB_NAME = 'practikum-offline';
 const DB_STORE = 'pack';
 
-// ─── IndexedDB helpers ───────────────────────────────────────────────────────
+const PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/';
+
+// Файлы Pyodide которые нужно закэшировать для офлайн-работы
+const PYODIDE_FILES = [
+  'pyodide.js',
+  'pyodide.asm.wasm',
+  'pyodide.asm.js',
+  'python_stdlib.zip',
+];
+
+// ─── IndexedDB helpers ────────────────────────────────────────────────────────
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -49,30 +60,13 @@ async function loadPack() {
   });
 }
 
-// ─── AES-GCM helpers (WebCrypto) ─────────────────────────────────────────────
+// ─── AES-GCM helpers (WebCrypto) ──────────────────────────────────────────────
 
 async function importAesKey(keyB64) {
   const raw = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
   return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-/**
- * Encrypts plaintext string with AES-GCM.
- * Returns base64(nonce[12] + ciphertext).
- */
-async function aesEncrypt(plaintext, cryptoKey) {
-  const nonce = crypto.getRandomValues(new Uint8Array(12));
-  const data = new TextEncoder().encode(plaintext);
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, cryptoKey, data);
-  const combined = new Uint8Array(12 + ct.byteLength);
-  combined.set(nonce);
-  combined.set(new Uint8Array(ct), 12);
-  return btoa(String.fromCharCode(...combined));
-}
-
-/**
- * Decrypts AES-GCM base64 payload produced by server (crypto_utils.py).
- */
 async function aesDecrypt(b64payload, cryptoKey) {
   const raw = Uint8Array.from(atob(b64payload), c => c.charCodeAt(0));
   const nonce = raw.slice(0, 12);
@@ -81,17 +75,8 @@ async function aesDecrypt(b64payload, cryptoKey) {
   return new TextDecoder().decode(pt);
 }
 
-// ─── Offline check logic ─────────────────────────────────────────────────────
+// ─── Offline check logic ──────────────────────────────────────────────────────
 
-/**
- * Runs user code against cached encrypted test cases using Pyodide.
- * Called from the page via postMessage when offline.
- *
- * @param {string} code      - User's Python code
- * @param {number} taskId    - Task ID
- * @param {object} pack      - Offline pack from IndexedDB
- * @returns {object}         - { correct, message }
- */
 async function checkOffline(code, taskId, pack) {
   const now = Math.floor(Date.now() / 1000);
   if (!pack || pack.expires_at < now) {
@@ -105,10 +90,17 @@ async function checkOffline(code, taskId, pack) {
 
   const cryptoKey = await importAesKey(taskData.key_b64);
 
-  // Lazy-load Pyodide (cached by SW on install)
+  // Загружаем Pyodide из кэша SW (не с CDN)
   if (!self.pyodide) {
-    self.importScripts('https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js');
-    self.pyodide = await loadPyodide();
+    try {
+      self.importScripts(PYODIDE_BASE + 'pyodide.js');
+      self.pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
+    } catch (err) {
+      return {
+        correct: false,
+        message: '⚠️ Pyodide не загружен. Откройте сайт онлайн хотя бы один раз для кэширования.',
+      };
+    }
   }
 
   const failedTests = [];
@@ -116,22 +108,19 @@ async function checkOffline(code, taskId, pack) {
   for (let i = 0; i < taskData.tests.length; i++) {
     const tc = taskData.tests[i];
 
-    // Decrypt input (hidden tests encrypted, open tests plaintext)
     let inputData;
     if (tc.is_hidden) {
       try {
         inputData = await aesDecrypt(tc.input_enc, cryptoKey);
       } catch {
-        continue; // skip if decryption fails (key expired mid-session)
+        continue;
       }
     } else {
       inputData = tc.input_enc;
     }
 
-    // Run user code via Pyodide
     let userOutput;
     try {
-      // Simulate stdin by patching builtins.input
       const inputLines = inputData ? inputData.split('\n') : [];
       await self.pyodide.runPythonAsync(`
 import sys, io, builtins
@@ -155,10 +144,6 @@ _stdout_capture.getvalue().strip()
       userOutput = String(err);
     }
 
-    // Encrypt user output with the SAME key and compare to expected_enc
-    // We re-encrypt user output and compare — but since AES-GCM nonce is
-    // random, we must DECRYPT expected and compare in plaintext.
-    // Note: expected_enc is decrypted only in memory, never stored.
     let expectedOutput;
     try {
       expectedOutput = await aesDecrypt(tc.expected_enc, cryptoKey);
@@ -197,12 +182,22 @@ _stdout_capture.getvalue().strip()
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll([
-        '/',
-        '/static/js/sw.js',
-      ])
-    )
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      // Кэшируем основные страницы
+      await cache.addAll(['/']);
+
+      // Кэшируем Pyodide — по одному файлу, чтобы не падать если один недоступен
+      for (const file of PYODIDE_FILES) {
+        try {
+          await cache.add(PYODIDE_BASE + file);
+          console.log('[SW] Cached Pyodide:', file);
+        } catch (e) {
+          console.warn('[SW] Failed to cache Pyodide file:', file, e);
+        }
+      }
+    })()
   );
   self.skipWaiting();
 });
@@ -216,19 +211,32 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static
+// Fetch: Pyodide CDN — из кэша, API — network-first, статика — cache-first
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Don't intercept offline-pack fetch itself or admin
   if (url.pathname.startsWith('/admin')) return;
 
+  // Pyodide файлы — всегда из кэша если есть
+  if (url.href.startsWith(PYODIDE_BASE)) {
+    event.respondWith(
+      caches.match(event.request).then(cached =>
+        cached || fetch(event.request).then(response => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+      )
+    );
+    return;
+  }
+
   if (url.pathname.startsWith('/api/')) {
-    // Network first for API calls
     event.respondWith(
       fetch(event.request)
         .then(async response => {
-          // When online-pack is fetched, save it to IndexedDB
           if (url.pathname === OFFLINE_PACK_URL && response.ok) {
             const clone = response.clone();
             clone.json().then(pack => savePack(pack));
@@ -236,7 +244,6 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(async () => {
-          // Offline: handle check_task via offline pack
           if (url.pathname === '/api/check/' && event.request.method === 'POST') {
             const body = await event.request.clone().json();
             const pack = await loadPack();
@@ -254,7 +261,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache first for static assets
+  // Статика — cache-first
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
@@ -269,8 +276,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ─── Message handler (from page) ─────────────────────────────────────────────
-// Page can send: { type: 'FETCH_OFFLINE_PACK' } to trigger pack refresh
+// ─── Message handler ──────────────────────────────────────────────────────────
 self.addEventListener('message', async event => {
   if (event.data && event.data.type === 'FETCH_OFFLINE_PACK') {
     try {
