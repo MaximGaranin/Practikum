@@ -6,13 +6,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import serializers as drf_serializers
 from django.utils.timezone import now
 
-from .models import Contest, ContestScore
+from .models import Contest, ContestScore, Submission
 from Logistic_Task.models import Task
 from practikum.checker import check_submission
-from practikum.currency import reward_for_contest
+from practikum.currency import reward_for_task, get_or_create_wallet
 
 
-# ── Сериализаторы ──────────────────────────────────────────────
+# ── Сериализаторы ──────────────────────────────────────────────────────────────
 class ContestSerializer(drf_serializers.ModelSerializer):
     tasks_count = drf_serializers.SerializerMethodField()
     is_active = drf_serializers.SerializerMethodField()
@@ -37,7 +37,7 @@ class ContestScoreSerializer(drf_serializers.ModelSerializer):
         fields = ['username', 'score', 'solved']
 
 
-# ── Views ──────────────────────────────────────────────────────
+# ── Views ──────────────────────────────────────────────────────────────────
 class ContestListView(APIView):
     permission_classes = [AllowAny]
 
@@ -98,7 +98,6 @@ class ContestSubmitView(APIView):
         except Task.DoesNotExist:
             return Response({'error': 'Задача не найдена в соревновании'}, status=404)
 
-        # Загружаем все тест-кейсы с флагом is_hidden
         all_test_cases = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
         test_cases_for_checker = [
             {'input': tc['input'], 'expected': tc['expected']}
@@ -106,7 +105,6 @@ class ContestSubmitView(APIView):
         ]
         result = check_submission(code, test_cases_for_checker)
 
-        # В соревновании не раскрываем детали — только статус
         if result['status'] == 'accepted':
             score_obj, _ = ContestScore.objects.get_or_create(
                 contest=contest, user=request.user,
@@ -131,3 +129,74 @@ class ContestLeaderboardView(APIView):
             contest_id=contest_id
         ).select_related('user').order_by('-score', '-solved')
         return Response(ContestScoreSerializer(scores, many=True).data)
+
+
+# ── Офлайн-проверка кода ───────────────────────────────────────────────────
+class AnalyzeView(APIView):
+    """
+    POST /api/analyze/
+    Принимает: { "task_id": <int>, "code": "<str>" }
+    Возвращает: результат проверки с маскированием скрытых тестов.
+    Авторизация: сессия Django (IsAuthenticated).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        task_id = request.data.get('task_id')
+        code = request.data.get('code', '').strip()
+
+        if not task_id:
+            return Response({'error': 'task_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        if not code:
+            return Response({'error': 'Код не может быть пустым'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return Response({'error': 'Задание не найдено'}, status=status.HTTP_404_NOT_FOUND)
+
+        all_test_cases = list(task.testcase_set.values('input', 'expected', 'is_hidden'))
+        test_cases_for_checker = [
+            {'input': tc['input'], 'expected': tc['expected']}
+            for tc in all_test_cases
+        ]
+
+        result = check_submission(code, test_cases_for_checker)
+
+        # Сохраняем сабмит
+        previous_attempts = Submission.objects.filter(
+            user=request.user, task=task
+        ).count()
+
+        Submission.objects.create(
+            user=request.user,
+            task=task,
+            code=code,
+            status=result['status'],
+        )
+
+        if result['status'] == 'accepted':
+            is_first_try = previous_attempts == 0
+            reward_for_task(request.user, task.name, is_first_try=is_first_try)
+
+        # Маскируем скрытые тесты
+        safe_results = []
+        for res, tc in zip(result.get('results', []), all_test_cases):
+            if tc['is_hidden']:
+                safe_results.append({
+                    'test': res['test'],
+                    'passed': res['passed'],
+                    'expected': '*** скрыто ***',
+                    'got': res['got'] if not res['passed'] else '*** скрыто ***',
+                    'error': res.get('error', ''),
+                    'is_hidden': True,
+                })
+            else:
+                safe_results.append({**res, 'is_hidden': False})
+
+        return Response({
+            'status': result['status'],
+            'passed': result['passed'],
+            'total': result['total'],
+            'results': safe_results,
+        })
